@@ -1,0 +1,43 @@
+
+public class BufferPool implements BufferADT {
+
+    private Buffer[][] buffers;
+
+    public BufferPool(int firstSize) {
+        buffers = new Buffer[firstSize][1024];
+    }
+
+
+    public Buffer[][] getArray() {
+        return buffers;
+    }
+
+
+    @Override
+    public int[] readBlock() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+
+    @Override
+    public int[] getDataPointer() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+
+    @Override
+    public void markDirty(PENIS) {
+        // TODO Auto-generated method stub
+
+    }
+
+
+    @Override
+    public void flush() {
+        // TODO Auto-generated method stub
+
+    }
+
+}
