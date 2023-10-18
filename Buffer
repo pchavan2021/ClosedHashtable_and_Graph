@@ -6,32 +6,35 @@
  * 
  */
 public class Buffer implements BufferADT {
-    private byte[] data;
+    private int[] data;
     private boolean isDirty;
 
     public Buffer(int bufferSize) {
-        this.data = new byte[bufferSize];
+        this.data = new int[bufferSize];
         this.isDirty = false;
     }
 
-    @Override
-    public byte[] readBlock() {
-        // In a real-world implementation, this would fetch data from disk.
+
+    public int[] readBlock() {
+
         return data;
     }
 
+
     @Override
-    public byte[] getDataPointer() {
+    public int[] getDataPointer() {
         return data;
     }
+
 
     @Override
     public void markDirty() {
         this.isDirty = true;
     }
 
+
     @Override
-    public void releaseBuffer() {
+    public void flush() {
         if (isDirty) {
             // In a real-world implementation, this would write data to disk.
         }
