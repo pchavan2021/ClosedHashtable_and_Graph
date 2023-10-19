@@ -5,6 +5,7 @@
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -103,42 +104,68 @@ public class Quicksort {
         }
 
     }
+    
+    static Byte[] getEntire(Byte[] A, int start) {
+        
+        return Arrays.copyOfRange(A, start, start + 4);
+    }
+    
+    public byte[] getKey(byte[] A, int start) {
+        return Arrays.copyOfRange(A, start, start + 2);
+    }
 
-
-    public static void quicksort(Comparable[] A, int i, int j) { // Quicksort
+    public static void quicksort(Byte[] A, int i, int j) { // Quicksort
         int pivotindex = findpivot(A, i, j); // Pick a pivot
         swap(A, pivotindex, j); // Stick pivot at end
         // k will be the first position in the right subarray
-        int k = partition(A, i, j - 1, A[j]);
+        int k = partition(A, i, j - 4, A[j]);
         swap(A, k, j); // Put pivot in place
-        if ((k - i) > 1) {
-            quicksort(A, i, k - 1);
+        if ((k - 4) > 1) {
+            quicksort(A, i, k - 4);
         } // Sort left partition
         if ((j - k) > 1) {
-            quicksort(A, k + 1, j);
+            quicksort(A, k + 4, j);
         } // Sort right partition
     }
 
-
-    static int findpivot(Comparable[] A, int i, int j) {
-        return (i + j) / 2;
+    //returns the pivot value, so the record in the middle
+    //of the array
+    static int findpivot(Byte[] A, int i, int j) {
+ 
+        return ((i + j) / 2);
     }
 
+    
+    public static short bytesToShort(Byte[] byteArray, int index) {
+        // Extract the two bytes
+        byte byte1 = byteArray[index];
+        byte byte2 = byteArray[index + 1];
 
+        // Combine them to form a short
+        return (short) ((byte1 << 8) | (byte2 & 0xFF));
+    }
+
+    //pass in the starting positions of the left and write values
     static int partition(
-        Comparable[] A,
-        int left,
-        int right,
-        Comparable pivot) {
-        while (left <= right) { // Move bounds inward until they meet
-            while (A[left].compareTo(pivot) < 0) {
+        Byte[] A,
+        int leftIndex,
+        int rightIndex,
+        int piv) {
+        
+        short pivot = bytesToShort(A, piv);
+        //get the right and left keys
+        short left = bytesToShort(A, leftIndex);
+        short right = bytesToShort(A, rightIndex);
+        
+        while (leftIndex <= rightIndex) { // Move bounds inward until they meet
+            while (left < pivot) {
                 left++;
             }
-            while ((right >= left) && (A[right].compareTo(
-                pivot) >= 0)) {
+            while ((rightIndex >= leftIndex) && (right >= 
+                pivot)) {
                 right--;
             }
-            if (right > left) {
+            if (rightIndex > leftIndex) {
                 swap(A, left, right);
             } // Swap out-of-place values
         }
@@ -146,9 +173,22 @@ public class Quicksort {
     }
 
 
-    private static void swap(Comparable[] A, int i, int j) {
-        Comparable temp = A[i];
-        A[i] = A[j];
-        A[j] = temp;
+    private static void swap(Byte[] A, int i, int j) {
+   
+        Byte[] temp = getEntire(A, i);
+        for (int x = i; x < i + 4; x++) {
+            for (int y = j; y < j + 4; y++) {
+                A[x] = A[y];
+            }
+             
+        }
+        
+        for (int y = j; y < j + 4; y++) {
+            for (int x = 0; x < temp.length; x++) {
+                A[y] = temp[x];
+            }
+           
+        }
+        
     }
 }
