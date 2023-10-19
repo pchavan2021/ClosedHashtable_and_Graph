@@ -90,11 +90,13 @@ public class Quicksort {
                 int fileEnd = raf.read(byteArray, i, 1);
 
             }
+            quicksort(byteArray, 0, byteArray.length - 1);
+            /**
             for (int i = 0; i < byteArray.length; i++) {
                 System.out.println("byteArray[" + i + "] = "
                     + byteArray[i]);
             }
-
+            **/
         }
         catch (
 
@@ -105,7 +107,7 @@ public class Quicksort {
 
     }
     
-    static Byte[] getEntire(Byte[] A, int start) {
+    static byte[] getEntire(byte[] A, int start) {
         
         return Arrays.copyOfRange(A, start, start + 4);
     }
@@ -114,7 +116,7 @@ public class Quicksort {
         return Arrays.copyOfRange(A, start, start + 2);
     }
 
-    public static void quicksort(Byte[] A, int i, int j) { // Quicksort
+    public static void quicksort(byte[] A, int i, int j) { // Quicksort
         int pivotindex = findpivot(A, i, j); // Pick a pivot
         swap(A, pivotindex, j); // Stick pivot at end
         // k will be the first position in the right subarray
@@ -130,13 +132,13 @@ public class Quicksort {
 
     //returns the pivot value, so the record in the middle
     //of the array
-    static int findpivot(Byte[] A, int i, int j) {
+    static int findpivot(byte[] A, int i, int j) {
  
         return ((i + j) / 2);
     }
 
     
-    public static short bytesToShort(Byte[] byteArray, int index) {
+    public static short bytesToShort(byte[] byteArray, int index) {
         // Extract the two bytes
         byte byte1 = byteArray[index];
         byte byte2 = byteArray[index + 1];
@@ -147,7 +149,7 @@ public class Quicksort {
 
     //pass in the starting positions of the left and write values
     static int partition(
-        Byte[] A,
+        byte[] A,
         int leftIndex,
         int rightIndex,
         int piv) {
@@ -159,11 +161,12 @@ public class Quicksort {
         
         while (leftIndex <= rightIndex) { // Move bounds inward until they meet
             while (left < pivot) {
-                left++;
+                leftIndex = leftIndex + 4;
             }
             while ((rightIndex >= leftIndex) && (right >= 
                 pivot)) {
-                right--;
+                rightIndex = rightIndex - 4;
+           
             }
             if (rightIndex > leftIndex) {
                 swap(A, left, right);
@@ -173,9 +176,11 @@ public class Quicksort {
     }
 
 
-    private static void swap(Byte[] A, int i, int j) {
-   
-        Byte[] temp = getEntire(A, i);
+    private static void swap(byte[] A, int i, int j) {
+        
+        
+        byte[] temp = getEntire(A, i);
+       
         for (int x = i; x < i + 4; x++) {
             for (int y = j; y < j + 4; y++) {
                 A[x] = A[y];
