@@ -80,8 +80,7 @@ public class Quicksort {
             Quicksort.generateFile(fileName, "4096", 'a');
 
             Random rdn = new Random();
-            RandomAccessFile raf = new RandomAccessFile(fileName,
-                "rw");
+            RandomAccessFile raf = new RandomAccessFile(fileName, "rw");
 
             int fileLength = (int)raf.length();
             byte[] byteArray = new byte[fileLength];
@@ -90,13 +89,13 @@ public class Quicksort {
                 int fileEnd = raf.read(byteArray, i, 1);
 
             }
-            quicksort(byteArray, 0, byteArray.length - 5);
-            /**
+            //bubblesort(byteArray);
+            quickSort(byteArray, 0, byteArray.length - 4);
+
             for (int i = 0; i < byteArray.length; i++) {
-                System.out.println("byteArray[" + i + "] = "
-                    + byteArray[i]);
+                System.out.println("byteArray[" + i + "] = " + byteArray[i]);
             }
-            **/
+
         }
         catch (
 
@@ -106,84 +105,128 @@ public class Quicksort {
         }
 
     }
-    
-    static byte[] getEntire(byte[] A, int start) {
-        
-        return Arrays.copyOfRange(A, start, start + 4);
-    }
-    
-    public byte[] getKey(byte[] A, int start) {
-        return Arrays.copyOfRange(A, start, start + 2);
+
+
+    static void bubblesort(byte[] A) {
+        int count = 0;
+        for (int i = 0; i < A.length - 4; i = i + 4) {
+            // Insert i'th record
+            for (int j = 0; j < A.length - 4 - i; j = j + 4) {
+                
+                if (getKey(A, j) > getKey(A, j + 4)) {
+                    System.out.println(count++);
+                    swap(A, j, j + 4);
+                }
+            }
+        }
+
+ 
     }
 
-    public static void quicksort(byte[] A, int i, int j) { // Quicksort
+
+    /**
+     * i is index 0, j is the index of the starting position of the
+     * last record
+     * 
+     * @param A
+     * @param i
+     * @param j
+     */
+    static void quickSort(byte[] A, int i, int j) { // Quicksort
+        System.out.println("called");
+        // pivotIndex is the starting position of the middle record
         int pivotindex = findpivot(A, i, j); // Pick a pivot
+
         swap(A, pivotindex, j); // Stick pivot at end
+
         // k will be the first position in the right subarray
-        int k = partition(A, i, j - 4, pivotindex);
+        // j is now the pivot since we swapped
+        int k = partition(A, i, j - 4, j);
+
         swap(A, k, j); // Put pivot in place
-        if ((k - 4) > 4) {
-            quicksort(A, i, k - 4);
+        if ((k - i) >= 4) {
+            quickSort(A, i, k - 4);
         } // Sort left partition
-        if ((j - k) > 4) {
-            quicksort(A, k + 4, j);
+        if ((j - k) >= 4) {
+            quickSort(A, k + 4, j);
         } // Sort right partition
     }
 
-    //returns the pivot value, so the record in the middle
-    //of the array
+
+    /**
+     * returns the index of the pivot
+     * based off of the original byte array
+     * 
+     * @param A
+     * @param i
+     * @param j
+     * @return
+     */
     static int findpivot(byte[] A, int i, int j) {
- 
-        return ((i + j) / 2);
+        //return ((i + j) / 2) & ~0x03; // Ensure it is a multiple of 4
+
+         int first = (i + j) / 4;
+         int second = (first + 1) / 2;
+         int third = (second * 4);
+         return third;
+        
     }
 
-    
-    public static short bytesToShort(byte[] byteArray, int index) {
+
+    private static void swap(byte[] array, int i, int j) {
+        byte[] temp = Arrays.copyOfRange(array, i, i + 4);
+
+        for (int x = 0; x < 4; x++) {
+            array[i + x] = array[j + x];
+            array[j + x] = temp[x];
+        }
+
+    }
+
+
+    public static short getKey(byte[] byteArray, int index) {
+
         // Extract the two bytes
         byte byte1 = byteArray[index];
         byte byte2 = byteArray[index + 1];
 
         // Combine them to form a short
-        return (short) ((byte1 << 8) | (byte2 & 0xFF));
+        return (short)((byte1 << 8) | (byte2 & 0xFF));
     }
 
-    //pass in the starting positions of the left and write values
-    static int partition(
-        byte[] A,
-        int leftIndex,
-        int rightIndex,
-        int piv) {
-        
-        short pivot = bytesToShort(A, piv);
-        //get the right and left keys
-        short left = bytesToShort(A, leftIndex);
-        short right = bytesToShort(A, rightIndex);
-        
-        while (leftIndex <= rightIndex) { // Move bounds inward until they meet
-            while (left < pivot) {
-                leftIndex = leftIndex + 4;
+
+    static int partition(byte[] A, int left, int right, int piv) {
+        short pivot = getKey(A, piv);
+        System.out.println("this is the pivot " + pivot);
+        // 
+        while (left <= right) { // Move bounds
+
+            // 
+            while (getKey(A, left) < pivot) {
+                System.out.println("this is the left " + left);
+                System.out.println("this is the left value " + getKey(A, left));
+                System.out.println("this is right " + right);
+                left += 4;
             }
-            while ((rightIndex >= leftIndex) && (right >= 
-                pivot)) {
-                rightIndex = rightIndex - 4;
-           
+            // 
+            while ((right >= left) && (getKey(A, right) >= pivot)) {
+                System.out.println("this is the left " + left);
+                System.out.println("this is the rihgt value " + getKey(A, right));
+                System.out.println("this is right " + right);
+                right -= 4;
             }
-            if (rightIndex > leftIndex) {
-                swap(A, leftIndex, rightIndex);
+            //getKey(A, right) > getKey(A, left)
+            if (right > left) {
+                System.out.println("this is the left " + left);
+                System.out.println("this is the left value " + getKey(A, left));
+                System.out.println("this is the rihgt value " + getKey(A, right));
+                System.out.println("this is right " + right);
+                swap(A, left, right);
+                //left += 4;
+                //right -= 4;
             } // Swap out-of-place values
         }
-        return leftIndex; // Return first position in right partition
+        return left; // Return first position in right partition
     }
 
-
-    private static void swap(byte[] A, int i, int j) {
-        
-        
-        byte[] temp = getEntire(A, i);
-
-        System.arraycopy(A, j, A, i, 4);
-        System.arraycopy(temp, 0, A, j, 4);
-        
-        
-    }
 }
