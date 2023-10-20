@@ -90,7 +90,7 @@ public class Quicksort {
                 int fileEnd = raf.read(byteArray, i, 1);
 
             }
-            quicksort(byteArray, 0, byteArray.length - 1);
+            quicksort(byteArray, 0, byteArray.length - 5);
             /**
             for (int i = 0; i < byteArray.length; i++) {
                 System.out.println("byteArray[" + i + "] = "
@@ -120,12 +120,12 @@ public class Quicksort {
         int pivotindex = findpivot(A, i, j); // Pick a pivot
         swap(A, pivotindex, j); // Stick pivot at end
         // k will be the first position in the right subarray
-        int k = partition(A, i, j - 4, A[j]);
+        int k = partition(A, i, j - 4, pivotindex);
         swap(A, k, j); // Put pivot in place
-        if ((k - 4) > 1) {
+        if ((k - 4) > 4) {
             quicksort(A, i, k - 4);
         } // Sort left partition
-        if ((j - k) > 1) {
+        if ((j - k) > 4) {
             quicksort(A, k + 4, j);
         } // Sort right partition
     }
@@ -169,10 +169,10 @@ public class Quicksort {
            
             }
             if (rightIndex > leftIndex) {
-                swap(A, left, right);
+                swap(A, leftIndex, rightIndex);
             } // Swap out-of-place values
         }
-        return left; // Return first position in right partition
+        return leftIndex; // Return first position in right partition
     }
 
 
@@ -180,20 +180,10 @@ public class Quicksort {
         
         
         byte[] temp = getEntire(A, i);
-       
-        for (int x = i; x < i + 4; x++) {
-            for (int y = j; y < j + 4; y++) {
-                A[x] = A[y];
-            }
-             
-        }
+
+        System.arraycopy(A, j, A, i, 4);
+        System.arraycopy(temp, 0, A, j, 4);
         
-        for (int y = j; y < j + 4; y++) {
-            for (int x = 0; x < temp.length; x++) {
-                A[y] = temp[x];
-            }
-           
-        }
         
     }
 }
