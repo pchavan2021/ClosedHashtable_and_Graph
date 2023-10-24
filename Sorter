@@ -1,0 +1,79 @@
+public class Sorter {
+
+    public Sorter(Record[] records) {
+
+        quickSort(records, 0, records.length - 1);
+
+    }
+
+
+    private void quickSort(Record[] A, int i, int j) {
+
+        int pivot = findPivot(A, i, j);
+
+        swap(A, pivot, j);
+
+        int k = partition(A, i, j - 1, j);
+
+        swap(A, k, j);
+
+        if ((k - i) > 1) {
+
+            quickSort(A, i, k - 1);
+
+        }
+
+        if ((j - k) > 1) {
+            quickSort(A, k + 1, j);
+        }
+
+    }
+
+
+    private int findPivot(Record[] toSort, int i, int j) {
+
+        return (i + j) / 2;
+    }
+
+
+    private int partition(
+        Record[] toSort,
+        int left,
+        int right,
+        int pivotIndex) {
+
+        Record pivot = toSort[pivotIndex];
+
+        while (left <= right) {
+            while (left <= right && toSort[left].compareTo(
+                pivot) < 0) {
+                left++;
+            }
+            while (left <= right && toSort[right].compareTo(
+                pivot) >= 0) {
+                right--;
+            }
+            if (left < right) {
+                swap(toSort, left, right);
+                left++;
+                right--;
+            }
+        }
+
+        return left;
+    }
+
+
+    public void swap(Record[] A, int index1, int index2) {
+        if (A == null) {
+            throw new IllegalArgumentException("Invalid");
+        }
+
+        // System.out.println("ran" + index2);
+        Record temp = A[index1];
+        A[index1] = A[index2];
+        A[index2] = temp;
+
+    }
+
+}
