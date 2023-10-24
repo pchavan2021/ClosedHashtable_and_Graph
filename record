@@ -1,0 +1,28 @@
+import java.util.Arrays;
+
+public class Record implements Comparable<Record> {
+
+    byte[] key = new byte[2];
+    byte[] value = new byte[2];
+
+    public Record() {
+        // purposelly empty
+    }
+
+
+    @Override
+    public int compareTo(Record other) {
+        return Short.compare(toShort(this.key), toShort(other.key));
+    }
+
+
+    private static short toShort(byte[] bytes) {
+        return (short)((bytes[0] << 8) | (bytes[1] & 0xFF));
+    }
+
+
+    public String toString() {
+        return "key: " + toShort(key);
+    }
+
+}
