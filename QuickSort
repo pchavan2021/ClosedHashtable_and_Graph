@@ -3,8 +3,10 @@
  * {Project Description Here}
  */
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -72,161 +74,133 @@ public class Quicksort {
      */
     public static void main(String[] args) throws IOException {
 
-        String fileName = args[0];
+        String fileName = "input.txt";
         int totalBufferPoolLength = Integer.parseInt(args[1]);
         String outputStats = args[2];
 
         try {
-            Quicksort.generateFile(fileName, "4096", 'a');
+            // Quicksort.generateFile(fileName, "4096", 'a');
+            long start = System.currentTimeMillis();
+            RandomAccessFile raf = new RandomAccessFile(fileName,
+                "rw");
+            int times = 0;
+            while (raf.getFilePointer() < raf.length()) {
+                byte[] byteArray = new byte[4096];
 
-            Random rdn = new Random();
-            RandomAccessFile raf = new RandomAccessFile(fileName, "rw");
+                int bytesRead = raf.read(byteArray);
 
-            int fileLength = (int)raf.length();
-            byte[] byteArray = new byte[fileLength];
+                if (bytesRead < 4096) {
+                    byteArray = Arrays.copyOf(byteArray, bytesRead);
+                }
 
-            for (int i = 0; i < byteArray.length; i++) {
-                int fileEnd = raf.read(byteArray, i, 1);
+                byteArray = sortByteArray(byteArray);
 
+                raf.seek(raf.getFilePointer() - bytesRead);
+
+                raf.write(byteArray);
+                times++;
+                System.out.println("tyime" + times);
             }
-            //bubblesort(byteArray);
-            quickSort(byteArray, 0, byteArray.length - 4);
-
-            for (int i = 0; i < byteArray.length; i++) {
-                System.out.println("byteArray[" + i + "] = " + byteArray[i]);
-            }
-
+            long endTime = System.currentTimeMillis();
+            printStats(outputStats, fileName, endTime - start);
+            System.out.println("Sort Execution Time (ms): " + (endTime
+                - start));
+            raf.close();
         }
-        catch (
-
-        Exception e) {
-
+        catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
 
-    static void bubblesort(byte[] A) {
-        int count = 0;
-        for (int i = 0; i < A.length - 4; i = i + 4) {
-            // Insert i'th record
-            for (int j = 0; j < A.length - 4 - i; j = j + 4) {
-                
-                if (getKey(A, j) > getKey(A, j + 4)) {
-                    System.out.println(count++);
-                    swap(A, j, j + 4);
-                }
-            }
+    public static void printStats(
+        String fileName,
+        String dataFileName,
+        long runtime)
+        throws IOException {
+        try (FileWriter writer = new FileWriter(fileName, true)) {
+
+            writer.write("Sort Execution Time (ms): " + runtime
+                + "\n");
+            writer.write("------------------------------------\n");
+        }
+    }
+
+
+    public static byte[] sortByteArray(byte[] data) {
+
+        int numRecords = data.length / 4;
+        Record[] records = new Record[numRecords];
+
+        for (int i = 0; i < numRecords; i++) {
+            Record newRecord = new Record();
+            records[i] = newRecord;
+
+            System.arraycopy(data, i * 4, records[i].key, 0, 2);
+            System.arraycopy(data, i * 4 + 2, records[i].value, 0, 2);
         }
 
- 
-    }
+        Sorter machine = new Sorter(records);
 
+        byte[] sortedData = new byte[data.length];
+        for (int i = 0; i < numRecords; i++) {
+            System.arraycopy(records[i].key, 0, sortedData, i * 4, 2);
+            System.arraycopy(records[i].value, 0, sortedData, i * 4
+                + 2, 2);
+        }
+
+        System.out.println(Arrays.toString(records));
+
+        return sortedData;
+    }
 
     /**
-     * i is index 0, j is the index of the starting position of the
-     * last record
      * 
-     * @param A
-     * @param i
-     * @param j
-     */
-    static void quickSort(byte[] A, int i, int j) { // Quicksort
-        System.out.println("called");
-        // pivotIndex is the starting position of the middle record
-        int pivotindex = findpivot(A, i, j); // Pick a pivot
-
-        swap(A, pivotindex, j); // Stick pivot at end
-
-        // k will be the first position in the right subarray
-        // j is now the pivot since we swapped
-        int k = partition(A, i, j - 4, j);
-
-        swap(A, k, j); // Put pivot in place
-        if ((k - i) >= 4) {
-            quickSort(A, i, k - 4);
-        } // Sort left partition
-        if ((j - k) >= 4) {
-            quickSort(A, k + 4, j);
-        } // Sort right partition
-    }
-
-
-    /**
-     * returns the index of the pivot
-     * based off of the original byte array
+     * static void quickSort(Record[] A, int i, int j) {
+     * int pivotIndex = findPivot(A, i, j);
+     * swap(A, pivotIndex, j);
      * 
-     * @param A
-     * @param i
-     * @param j
-     * @return
-     */
-    static int findpivot(byte[] A, int i, int j) {
-        //return ((i + j) / 2) & ~0x03; // Ensure it is a multiple of 4
-
-         int first = (i + j) / 4;
-         int second = (first + 1) / 2;
-         int third = (second * 4);
-         return third;
-        
-    }
-
-
-    private static void swap(byte[] array, int i, int j) {
-        byte[] temp = Arrays.copyOfRange(array, i, i + 4);
-
-        for (int x = 0; x < 4; x++) {
-            array[i + x] = array[j + x];
-            array[j + x] = temp[x];
-        }
-
-    }
-
-
-    public static short getKey(byte[] byteArray, int index) {
-
-        // Extract the two bytes
-        byte byte1 = byteArray[index];
-        byte byte2 = byteArray[index + 1];
-
-        // Combine them to form a short
-        return (short)((byte1 << 8) | (byte2 & 0xFF));
-    }
-
-
-    static int partition(byte[] A, int left, int right, int piv) {
-        short pivot = getKey(A, piv);
-        System.out.println("this is the pivot " + pivot);
-        // 
-        while (left <= right) { // Move bounds
-
-            // 
-            while (getKey(A, left) < pivot) {
-                System.out.println("this is the left " + left);
-                System.out.println("this is the left value " + getKey(A, left));
-                System.out.println("this is right " + right);
-                left += 4;
-            }
-            // 
-            while ((right >= left) && (getKey(A, right) >= pivot)) {
-                System.out.println("this is the left " + left);
-                System.out.println("this is the rihgt value " + getKey(A, right));
-                System.out.println("this is right " + right);
-                right -= 4;
-            }
-            //getKey(A, right) > getKey(A, left)
-            if (right > left) {
-                System.out.println("this is the left " + left);
-                System.out.println("this is the left value " + getKey(A, left));
-                System.out.println("this is the rihgt value " + getKey(A, right));
-                System.out.println("this is right " + right);
-                swap(A, left, right);
-                //left += 4;
-                //right -= 4;
-            } // Swap out-of-place values
-        }
-        return left; // Return first position in right partition
-    }
-
+     * int k = partition(A, i, j - 1, A[j]);
+     * swap(A, k, j);
+     * if ((k - i) > 1) {
+     * quickSort(A, i, k - 1);
+     * } // Sort left partition
+     * if ((j - k) > 1) {
+     * quickSort(A, k + 1, j);
+     * } // Sort right partition
+     * }
+     * 
+     * 
+     * static int partition(Record[] A, int left, int right, Record pivot) {
+     * while (left <= right) { // Move bounds inward until they meet
+     * while (left < A.length && A[left].compareTo(pivot) < 0) {
+     * left++;
+     * }
+     * while ((right >= left) && A[right].compareTo(pivot) >= 0) {
+     * right--;
+     * }
+     * if (right > left) {
+     * swap(A, left, right);
+     * } // Swap out-of-place values
+     * }
+     * return left;
+     * }
+     * 
+     * 
+     * static int findPivot(Record[] A, int i, int j) {
+     * return (i + j) / 2;
+     * }
+     * 
+     * static void swap(Record[]A, int index1, int index2) {
+     * if (A == null || index1 < 0 || index2 < 0 || index1 >= A.length || index2
+     * >= A.length) {
+     * throw new IllegalArgumentException("Invalid");
+     * }
+     * 
+     * Record temp = A[index1];
+     * A[index1] = A[index2];
+     * A[index2] = temp;
+     * 
+     * }
+     **/
 }
