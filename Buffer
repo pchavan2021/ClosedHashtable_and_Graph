@@ -1,43 +1,106 @@
-/**
- * 
- */
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
 /**
- * 
+ * @author pallucha21 and evanhowe03
+ * @version 1.0
  */
-public class Buffer implements BufferADT {
-    private int[] data;
-    private boolean isDirty;
+public class Buffer {
+    
+    //an integer representing the index of the block
+    //this record array is associated with
+    private int buff;
+    
+    //array of records
+    private Record[] data;
+    private RandomAccessFile disk;
+  //  private int currIndex;
+    private final static int BLOCK_SIZE = 4096;
 
-    public Buffer(int bufferSize) {
-        this.data = new int[bufferSize];
-        this.isDirty = false;
+    /**
+     * construction
+     * 
+     * @param bufferSize
+     *            this is the size
+     */
+    public Buffer(RandomAccessFile disk, int block) {
+       
+        data = new Record[BLOCK_SIZE];
+        this.disk = disk;
+        this.buff = block;
+    
     }
 
 
-    public int[] readBlock() {
+    /**
+     * read lock
+     * 
+     * @return data
+     */
+    public Record[] readBlock() {
 
+        //Stat.cacheHits++;
         return data;
     }
-
-
-    @Override
-    public int[] getDataPointer() {
-        return data;
+    
+    public boolean add(Record rec) {
+      
+        
+        return true;
     }
-
-
-    @Override
-    public void markDirty() {
-        this.isDirty = true;
+  
+    public void write(Record[] newData)
+    {
+        //Sets new data to the buffer and marks the buffer as dirty, 
+        //indicating that the buffer contents have been modified.
     }
-
-
-    @Override
-    public void flush() {
-        if (isDirty) {
-            // In a real-world implementation, this would write data to disk.
+    
+    public void writeBack() 
+        throws IOException {
+        /**
+         * If the buffer is dirty (i.e., its data was modified), 
+         * it writes the buffer's data back to the disk at the appropriate position.
+         *  This method also increments a counter named diskWrites in a separate Stat class.
+         */
+        
+        if (isDirty)
+        {
+            disk.seek(position);
+            disk.write(data);
+            dirty = false;
+            // update stat info.
+            Stat.diskWrites++;
         }
-        isDirty = false;
+        
     }
+    
+    public void diskRead()
+        throws IOException
+    {
+        /**
+         * Reads a block of data from the disk into the buffer.
+         *  It also increments a counter named diskReads in a separate Stat class.
+         */
+        data = new byte[BLOCK_SIZE];
+        disk.seek(position);
+        disk.read(data);
+        // update stat info.
+        Stat.diskReads++;
+    }
+
+
+    public int block()
+    {
+        /**
+         * Returns the block index associated with this buffer.
+         */
+        return block;
+    }
+    
+    @Override
+    public void releaseBuffer() {
+
+    }
+
+
 }
