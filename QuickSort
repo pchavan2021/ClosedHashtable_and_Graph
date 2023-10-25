@@ -136,16 +136,19 @@ public class Quicksort {
             Record newRecord = new Record();
             records[i] = newRecord;
 
-            System.arraycopy(data, i * 4, records[i].key, 0, 2);
-            System.arraycopy(data, i * 4 + 2, records[i].value, 0, 2);
+            byte[] key = records[i].getKey();
+            byte[] value = records[i].getValue();
+            System.arraycopy(data, i * 4, records[i].getKey(), 0, 2);
+            System.arraycopy(data, i * 4 + 2, records[i].getValue(), 0, 2);
+
         }
 
         Sorter machine = new Sorter(records);
 
         byte[] sortedData = new byte[data.length];
         for (int i = 0; i < numRecords; i++) {
-            System.arraycopy(records[i].key, 0, sortedData, i * 4, 2);
-            System.arraycopy(records[i].value, 0, sortedData, i * 4
+            System.arraycopy(records[i].getKey(), 0, sortedData, i * 4, 2);
+            System.arraycopy(records[i].getValue(), 0, sortedData, i * 4
                 + 2, 2);
         }
 
