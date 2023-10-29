@@ -32,7 +32,7 @@ public class Buffer {
         this.disk = disk;
         this.buff = block;
         this.isDirty = false;
-        this.position = block * BLOCK_SIZE * 4;
+        this.position = block % BLOCK_SIZE; // postion in file
 
     }
 
@@ -52,8 +52,9 @@ public class Buffer {
         if (currIndex >= data.length) {
             return false;
         }
-        data[currIndex++] = rec;
+        data[currIndex] = rec;
         isDirty = true;
+        currIndex++;
         return true;
     }
 
