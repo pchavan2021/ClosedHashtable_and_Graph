@@ -15,8 +15,7 @@ public class Buffer {
     // array of records
     private Record[] data;
     private RandomAccessFile disk;
-    private int currIndex;
-    private final static int BLOCK_SIZE = 4096;
+    private final static int BLOCK_SIZE = 4096/4;
     private long position; // postiton in the file
     private boolean isDirty;
 
@@ -27,7 +26,7 @@ public class Buffer {
      *            this is the size
      */
     public Buffer(RandomAccessFile disk, int block) {
-        currIndex = 0;
+    
         data = new Record[BLOCK_SIZE];
         this.disk = disk;
         this.buff = block;
@@ -47,17 +46,34 @@ public class Buffer {
         return data;
     }
 
-
-    public boolean add(Record rec) {
-        if (currIndex >= data.length) {
-            return false;
+    /**
+     * if the last spot is full return that record
+     * if the the spot was empty return null;
+     * @param rec
+     * @return
+     */
+    public Record add(Record rec) {
+        if(data[data.length - 1] != null) {
+            return data[data.length - 1];
         }
-        data[currIndex] = rec;
-        isDirty = true;
-        currIndex++;
-        return true;
+        
+        for (int i = 0; i < data.length; i++) {
+            if (data[i] == null) {
+                data[i] = rec;
+                
+            }
+        }
+        
+        return null;
+    }
+    
+    public short getKey(int index) {
+        return data[index].getKey();
     }
 
+    public short getValue(int index) {
+        return data[index].getValue();
+    }
 
     public void write(Record[] newData) {
         // Sets new data to the buffer and marks the buffer as dirty,
