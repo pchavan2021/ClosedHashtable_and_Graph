@@ -13,6 +13,7 @@ public class BufferPool {
     private int totalBlocksInFile;
     private final static int BLOCK_SIZE = 4096;
     private final static int RECORD_SIZE = 4;
+    private int posFile;
 
     /**
      * this is the constructor
@@ -23,12 +24,14 @@ public class BufferPool {
      *            this a numbuffers
      */
     public BufferPool(File file, int numBuffer) throws IOException {
+        
+        posFile = 0;
 
         disk = new RandomAccessFile(file, "rw");
 
-        totalBlocksInFile = (int)disk.length() / BLOCK_SIZE;
+        totalBlocksInFile = (int)disk.length() / (BLOCK_SIZE/4);
 
-        pool = new Buffer[numBuffer][BLOCK_SIZE];
+        pool = new Buffer[numBuffer][BLOCK_SIZE/RECORD_SIZE];
     }
 
 
@@ -44,7 +47,11 @@ public class BufferPool {
         // insert the record into the pool
         // if the pool is at it's capacity
         // use the LRU to writeBack to the file
-
+        Buffer result = add(rec);
+        if (result != null) {
+            result.writeBack();
+            insert(rec);
+        }
     }
 
 
@@ -56,21 +63,43 @@ public class BufferPool {
      * @return whether the pool
      *         is full or not
      */
-    public boolean add(Record rec) {
-        int nextIndex = 0;
-        if (nextIndex < pool.length) {
-            pool[nextIndex].add(rec);
-            nextIndex++;
-        } else {
-            System.out.println("Array is full. Can't add more items.");
-        }
+    public Buffer add(Record rec) {
+        
+        for (int i = 0; i < pool.length; i++) {
+            Record fill = pool[i][0].add(rec);
+            if (fill == null) {
+          
+                return null;
+            }
+            
+        }  
+        
+        int size  = (BLOCK_SIZE/RECORD_SIZE) - 1;
+        return pool[pool.length - 1][size];
         
     }
     
     
-    public Buffer getBuffer(Record rec) {
-        //get a buffer for a specific block from the pool.
+    public Record getBuffer(int block) throws IOException {
         
+        //get a buffer for a specific block from the pool.
+        //boolean found = pool.search(block);
+        
+        //if (!found) {
+            // read from disk and enqueue to pool
+            byte[] blockData = new byte[4];
+            disk.seek(posFile);
+            disk.read(blockData);
+            
+            //make recrod to insert
+            Record addRec = new Record();
+            System.arraycopy(blockData, 0, addRec.getKey(), 0, 2);
+            System.arraycopy(blockData, 2, addRec.getValue(), 0, 2);
+            
+            this.insert(addRec);
+            
+            return addRec;
+       // }
         //if the block is found, return the most recently used buffer
         //which is likely the rear
     }
@@ -78,30 +107,28 @@ public class BufferPool {
     public short getKey(int row, int col) {
         //return the key for the specific record at the
         //given directions
+        return pool[row][col].getKey(col);
         
+    }
+    
+    public short getValue(int row, int col) {
+        return pool[row][col].getValue(col);
     }
     
     public void flush() 
         throws IOException {
         //remove all the buffers from the pool
         //write them back into the file
-        
+        for (int i = 0; i < pool.length; i++) {
+            pool[i][0].writeBack();
+        }
+    }
+    
+    public int numBlocks() {
+        return this.totalBlocksInFile;
     }
  
-    /**
-     * 
-     * @return the buffers
-     */
-    public Buffer[][] getArray() {
-        return buffers;
-    }
-
-
-    @Override
-    public Record[] readBlock() {
-
-        return null;
-    }
+    
 
 
 
