@@ -74,42 +74,15 @@ public class Quicksort {
      */
     public static void main(String[] args) throws IOException {
 
-        String fileName = "input.txt";
-        int totalBufferPoolLength = Integer.parseInt(args[1]);
-        String outputStats = args[2];
-
-        try {
-            // Quicksort.generateFile(fileName, "4096", 'a');
-            long start = System.currentTimeMillis();
-            RandomAccessFile raf = new RandomAccessFile(fileName,
-                "rw");
-            int times = 0;
-            while (raf.getFilePointer() < raf.length()) {
-                byte[] byteArray = new byte[4096];
-
-                int bytesRead = raf.read(byteArray);
-
-                if (bytesRead < 4096) {
-                    byteArray = Arrays.copyOf(byteArray, bytesRead);
-                }
-
-                byteArray = sortByteArray(byteArray);
-
-                raf.seek(raf.getFilePointer() - bytesRead);
-
-                raf.write(byteArray);
-                times++;
-                System.out.println("tyime" + times);
-            }
-            long endTime = System.currentTimeMillis();
-            printStats(outputStats, fileName, endTime - start);
-            System.out.println("Sort Execution Time (ms): " + (endTime
-                - start));
-            raf.close();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+        String disk = args[0];
+        int numBuffer = Integer.parseInt(args[1]);
+        String statFile = args[2];
+        
+        Sorter sorting = new Sorter(disk, numBuffer);
+        
+        sorting.sort();
+        // flush when sorting is done.
+        sorting.flush();
     }
 
 
@@ -126,84 +99,5 @@ public class Quicksort {
         }
     }
 
-
-    public static byte[] sortByteArray(byte[] data) {
-
-        int numRecords = data.length / 4;
-        Record[] records = new Record[numRecords];
-
-        for (int i = 0; i < numRecords; i++) {
-            Record newRecord = new Record();
-            records[i] = newRecord;
-
-            byte[] key = records[i].getKey();
-            byte[] value = records[i].getValue();
-            System.arraycopy(data, i * 4, records[i].getKey(), 0, 2);
-            System.arraycopy(data, i * 4 + 2, records[i].getValue(), 0, 2);
-
-        }
-
-        Sorter machine = new Sorter(records);
-
-        byte[] sortedData = new byte[data.length];
-        for (int i = 0; i < numRecords; i++) {
-            System.arraycopy(records[i].getKey(), 0, sortedData, i * 4, 2);
-            System.arraycopy(records[i].getValue(), 0, sortedData, i * 4
-                + 2, 2);
-        }
-
-        System.out.println(Arrays.toString(records));
-
-        return sortedData;
-    }
-
-    /**
-     * 
-     * static void quickSort(Record[] A, int i, int j) {
-     * int pivotIndex = findPivot(A, i, j);
-     * swap(A, pivotIndex, j);
-     * 
-     * int k = partition(A, i, j - 1, A[j]);
-     * swap(A, k, j);
-     * if ((k - i) > 1) {
-     * quickSort(A, i, k - 1);
-     * } // Sort left partition
-     * if ((j - k) > 1) {
-     * quickSort(A, k + 1, j);
-     * } // Sort right partition
-     * }
-     * 
-     * 
-     * static int partition(Record[] A, int left, int right, Record pivot) {
-     * while (left <= right) { // Move bounds inward until they meet
-     * while (left < A.length && A[left].compareTo(pivot) < 0) {
-     * left++;
-     * }
-     * while ((right >= left) && A[right].compareTo(pivot) >= 0) {
-     * right--;
-     * }
-     * if (right > left) {
-     * swap(A, left, right);
-     * } // Swap out-of-place values
-     * }
-     * return left;
-     * }
-     * 
-     * 
-     * static int findPivot(Record[] A, int i, int j) {
-     * return (i + j) / 2;
-     * }
-     * 
-     * static void swap(Record[]A, int index1, int index2) {
-     * if (A == null || index1 < 0 || index2 < 0 || index1 >= A.length || index2
-     * >= A.length) {
-     * throw new IllegalArgumentException("Invalid");
-     * }
-     * 
-     * Record temp = A[index1];
-     * A[index1] = A[index2];
-     * A[index2] = temp;
-     * 
-     * }
-     **/
+    
 }
