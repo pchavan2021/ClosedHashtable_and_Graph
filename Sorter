@@ -29,10 +29,8 @@ public class Sorter {
             pool = new BufferPool(file, numBuffer);
             this.numBuffer = numBuffer;
             //might need to change this to the size of the file not the pool
-            diskSize = pool.numBlocks() * BLOCK_SIZE / RECORD_SIZE;
-            
-
-   
+            diskSize = numBuffer * BLOCK_SIZE / RECORD_SIZE;
+ 
     }
     
     public int getSize()
@@ -109,6 +107,9 @@ public class Sorter {
 
 
     public void swap(int index1, int index2) throws IOException {
+        
+        //if i = 4098
+            //add the second blcok of buffers to the pool
           
         Record lRec = pool.getRec(index1);
         Record rRec = pool.getRec(index2);
@@ -122,6 +123,10 @@ public class Sorter {
         lRec.setValue(temp.getValueArray());
   
 
+    }
+    
+    public void flush() throws IOException {
+        pool.flush();
     }
 
 }
