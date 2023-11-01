@@ -61,6 +61,7 @@ public class BufferPool {
             Buffer lastBuffer = pool[pool.length - 1];
             // System.out.println(lastBuffer.toString());
             lastBuffer.writeBack();
+            insert(rec, block);
             // System.out.println("AFTER");
             // System.out.println(lastBuffer.toString());
         }
@@ -86,21 +87,24 @@ public class BufferPool {
 
 
     public Record getRec(int index) throws IOException {
-
+        // System.out.println("index " + index);
         int bufferArray = index / 4096;
         int pos = index % 1024;
+        // System.out.println("bufferArray " + bufferArray);
+        // System.out.println("pos " + pos);
 
         // get a buffer for a specific block from the pool.
         // boolean found = pool.search(block);
         for (int i = 0; i < numberOfBuffers; i++) {
             if (pool[i].getBlock() == bufferArray) {
-                System.out.println();
+                System.out.println("cam");
                 return pool[i].getRec(pos);
             }
 
         }
 
         if (!isFull()) {
+            System.out.println("RAN");
             int readIndex = bufferArray * 4096;
             for (int i = 0; i < 1024; i++) {
 
@@ -109,8 +113,10 @@ public class BufferPool {
                 disk.read(blockData);
 
                 Record addRec = new Record();
-                System.arraycopy(blockData, 0, addRec.getKeyArray(), 0, 2);
-                System.arraycopy(blockData, 2, addRec.getValueArray(), 0, 2);
+                System.arraycopy(blockData, 0, addRec.getKeyArray(),
+                    0, 2);
+                System.arraycopy(blockData, 2, addRec.getValueArray(),
+                    0, 2);
 
                 readIndex = readIndex + 4;
                 insert(addRec, bufferArray);
@@ -125,6 +131,8 @@ public class BufferPool {
         }
 
         int readIndex = bufferArray * 4096;
+        System.out.println("pam");
+
         for (int i = 0; i < 1024; i++) {
 
             byte[] blockData = new byte[4];
@@ -132,8 +140,10 @@ public class BufferPool {
             disk.read(blockData);
 
             Record addRec = new Record();
-            System.arraycopy(blockData, 0, addRec.getKeyArray(), 0, 2);
-            System.arraycopy(blockData, 2, addRec.getValueArray(), 0, 2);
+            System.arraycopy(blockData, 0, addRec.getKeyArray(), 0,
+                2);
+            System.arraycopy(blockData, 2, addRec.getValueArray(), 0,
+                2);
 
             readIndex = readIndex + 4;
             insert(addRec, bufferArray);
@@ -152,11 +162,12 @@ public class BufferPool {
 
 
     public boolean isFull() {
+
         for (int i = 0; i < numberOfBuffers; i++) {
-            if (pool[i] == null) {
+
+            if (pool[i].getCurrentIndex() < 1024) {
                 return false;
             }
-
         }
 
         return true;
@@ -164,14 +175,20 @@ public class BufferPool {
 
 
     public short getKey(int index) {
+
         // return the key for the specific record at the
         // given directions
-        System.out.println(index);
+        // System.out.println(index);
 
         int block = index / 1024;
         int position = index % 1024;
-        System.out.println("blocky: " + block + " pusition: " + position);
-        return pool[block].getKey(position);
+
+        for (int i = 0; i < numberOfBuffers; i++) {
+            if (block == pool[i].getBlock()) {
+                return pool[i].getKey(position);
+            }
+        }
+        return 0;
 
     }
 
