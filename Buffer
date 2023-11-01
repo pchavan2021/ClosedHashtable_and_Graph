@@ -133,7 +133,7 @@ public class Buffer {
          * Stat class.
          */
 
-        System.out.println("TTTTTTTT");
+        // System.out.println("TTTTTTTT");
         // write back and increment
         disk.seek(position); // should be current pos
         for (int x = 0; x < data.length; x++) {
