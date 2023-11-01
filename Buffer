@@ -15,9 +15,12 @@ public class Buffer {
     // array of records
     private Record[] data;
     private RandomAccessFile disk;
-    private final static int BLOCK_SIZE = 4096/4;
+    private final static int BLOCK_SIZE = 4096 / 4;
+    //private final static int RECORD_SIZE = 4;
     private long position; // postiton in the file
     private boolean isDirty;
+    private int currentIndex;
+    private int blockInFile;
 
     /**
      * construction
@@ -25,16 +28,21 @@ public class Buffer {
      * @param bufferSize
      *            this is the size
      */
-    public Buffer(RandomAccessFile disk, int block) {
-    
+    public Buffer(RandomAccessFile disk) {
+
         data = new Record[BLOCK_SIZE];
         this.disk = disk;
-        this.buff = block;
+       // this.buff = block;
         this.isDirty = false;
-        this.position = block % BLOCK_SIZE; // postion in file
+        this.currentIndex = 0;
+        // this.position = block % BLOCK_SIZE; // postion in file
+        //this.position = block * 4096;
 
     }
 
+    public Record getRec(int index) {
+        return data[index];
+    }
 
     /**
      * read lock
@@ -46,34 +54,60 @@ public class Buffer {
         return data;
     }
 
+
     /**
      * if the last spot is full return that record
      * if the the spot was empty return null;
+     * 
      * @param rec
      * @return
      */
-    public Record add(Record rec) {
-        if(data[data.length - 1] != null) {
-            return data[data.length - 1];
-        }
+    public boolean add(Record rec, int block) {
         
+        if (data[data.length - 1] != null) {
+            return false;
+        }
+
         for (int i = 0; i < data.length; i++) {
             if (data[i] == null) {
                 data[i] = rec;
-                
+                currentIndex++;
+                setBlock(block);
+                return true;
             }
         }
-        
-        return null;
+        return false;
     }
-    
+
+
+    public byte[] getKeyArray(int index) {
+        return data[index].getKeyArray();
+    }
+
+
+    public byte[] getValueArray(int index) {
+        return data[index].getKeyArray();
+    }
+
+
     public short getKey(int index) {
+        System.out.println("FISHIE" + index);
         return data[index].getKey();
     }
+    
+    public void setBlock(int block) {
+        
+        blockInFile = block;
+    }
+    public int getBlock() {
+        return blockInFile;
+    }
+
 
     public short getValue(int index) {
         return data[index].getValue();
     }
+
 
     public void write(Record[] newData) {
         // Sets new data to the buffer and marks the buffer as dirty,
@@ -93,40 +127,18 @@ public class Buffer {
          * Stat class.
          */
 
-        if (isDirty) {
-            // write back and increment
-            disk.seek(position); // should be current pos
-            for (int x = 0; x < data.length; x++) {
+        System.out.println("TTTTTTTT");
+        // write back and increment
+        disk.seek(position); // should be current pos
+        for (int x = 0; x < data.length; x++) {
+            if (data[x] != null) {
                 byte[] recordBytes = data[x].toByteArray();
                 disk.write(recordBytes);
             }
-            isDirty = false;
+            data[x] = null;
         }
+        isDirty = false;
 
-    }
-
-
-    public void diskRead() throws IOException {
-        /**
-         * Reads a block of data from the disk into the buffer.
-         * It also increments a counter named diskReads in a separate Stat
-         * class.
-         */
-
-        for (int i = 0; i < BLOCK_SIZE; i++) {
-            byte[] recordBytes = new byte[4];
-
-            disk.read(recordBytes);
-            Record record = new Record();
-
-            byte[] keyBytes = Arrays.copyOfRange(recordBytes, 0, 2);
-            byte[] valueBytes = Arrays.copyOfRange(recordBytes, 2, 4);
-
-            record.setKey(keyBytes);
-            record.setValue(valueBytes);
-
-            data[i] = record;
-        }
     }
 
 
@@ -135,6 +147,41 @@ public class Buffer {
          * Returns the block index associated with this buffer.
          */
         return position;
+    }
+
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        // Include buffer info
+        sb.append("Buffer Position: ").append(position).append("\n");
+        sb.append("Is Dirty: ").append(isDirty).append("\n");
+
+        // Summarize the records in the buffer
+        sb.append("Records:\n");
+        for (int i = 0; i < data.length; i++) {
+            if (data[i] != null) {
+                sb.append("Index ").append(i).append(": ");
+                sb.append(data[i].toString()).append("\n");
+            }
+            else {
+                sb.append("Index ").append(i).append(": Empty\n");
+            }
+        }
+
+        return sb.toString();
+    }
+
+
+    public int getCurrentIndex() {
+        return currentIndex;
+    }
+
+
+    public Record[] getData() {
+
+        return data;
     }
 
 }
