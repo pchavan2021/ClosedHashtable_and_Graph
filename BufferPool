@@ -96,42 +96,18 @@ public class BufferPool {
         // get a buffer for a specific block from the pool.
         // boolean found = pool.search(block);
         for (int i = 0; i < numberOfBuffers; i++) {
+            System.out.println("I: " + i + "" + " BLCOKS: " + pool[i]
+                .getBlock() + " BUFFERARRAY: " + bufferArray
+                + " INDEX: " + index);
             if (pool[i].getBlock() == bufferArray) {
-                System.out.println("cam");
+                System.out.println("Equal Block");
                 return pool[i].getRec(pos);
             }
 
         }
 
-        if (!isFull()) {
-            System.out.println("RAN");
-            int readIndex = bufferArray * 4096;
-            for (int i = 0; i < 1024; i++) {
-
-                byte[] blockData = new byte[4];
-                disk.seek(readIndex);
-                disk.read(blockData);
-
-                Record addRec = new Record();
-                System.arraycopy(blockData, 0, addRec.getKeyArray(),
-                    0, 2);
-                System.arraycopy(blockData, 2, addRec.getValueArray(),
-                    0, 2);
-
-                readIndex = readIndex + 4;
-                insert(addRec, bufferArray);
-            }
-
-            for (int i = 0; i < numberOfBuffers; i++) {
-                if (pool[i].getBlock() == bufferArray) {
-                    return pool[i].getRec(pos);
-                }
-
-            }
-        }
-
         int readIndex = bufferArray * 4096;
-        System.out.println("pam");
+        System.out.println("Full");
 
         for (int i = 0; i < 1024; i++) {
 
@@ -149,28 +125,10 @@ public class BufferPool {
             insert(addRec, bufferArray);
         }
 
-        // pool[i][j] = new Buffer(disk, j);
-
-        // if (!found) {
-        // read from disk and enqueue to pool
-
-        return pool[numberOfBuffers - 1].getRec(index % 1024);
+        return pool[0].getRec(index % 1024);
         // }
         // if the block is found, return the most recently used buffer
         // which is likely the rear
-    }
-
-
-    public boolean isFull() {
-
-        for (int i = 0; i < numberOfBuffers; i++) {
-
-            if (pool[i].getCurrentIndex() < 1024) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
 
