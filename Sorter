@@ -10,46 +10,52 @@ import java.io.IOException;
  * @version 1.0
  */
 public class Sorter {
-    
-    private BufferPool       pool;
-    private int              diskSize;
-    private int              numBuffer;
-    private final static int BLOCK_SIZE  = 4096;
-    private final static int RECORD_SIZE = 4;
 
+    private BufferPool pool;
+    private int diskSize;
+    private int numBuffer;
+    private final static int BLOCK_SIZE = 4096;
+    private final static int RECORD_SIZE = 4;
 
     /**
      * this is the constructor
-     * @param records list
-     * @throws IOException 
+     * 
+     * @param records
+     *            list
+     * @throws IOException
      */
     public Sorter(String name, int numBuffer) throws IOException {
-        
-            File file = new File(name);
-            pool = new BufferPool(file, numBuffer);
-            this.numBuffer = numBuffer;
-            //might need to change this to the size of the file not the pool
-            diskSize = numBuffer * BLOCK_SIZE / RECORD_SIZE;
- 
+
+        File file = new File(name);
+        pool = new BufferPool(file, numBuffer);
+        this.numBuffer = numBuffer;
+
+        long fileSize = file.length(); // size of the file in bytes
+
+        diskSize = (int)(fileSize / RECORD_SIZE);
     }
-    
-    public int getSize()
-    {
+
+
+    public int getSize() {
         return diskSize;
     }
 
 
-    public void sort()
-        throws IOException
-    {
+    public void sort() throws IOException {
         quicksortHelp(0, this.getSize() - 1);
     }
+
+
     /**
      * this is the quicksort
-     * @param A array
-     * @param i starting pos
-     * @param j ending pos
-     * @throws IOException 
+     * 
+     * @param A
+     *            array
+     * @param i
+     *            starting pos
+     * @param j
+     *            ending pos
+     * @throws IOException
      */
     private void quicksortHelp(int i, int j) throws IOException {
 
@@ -80,19 +86,19 @@ public class Sorter {
     }
 
 
-    private int partition(
-        int left,
-        int right,
-        int pivotIndex) throws IOException {
+    private int partition(int left, int right, int pivotIndex)
+        throws IOException {
 
-        //Record pivot = toSort[pivotIndex];
+        // Record pivot = toSort[pivotIndex];
 
         while (left <= right) {
-            
-            while (left <= right && pool.getKey(left) < pool.getKey(pivotIndex)) {
+
+            while (left <= right && pool.getKey(left) < pool.getKey(
+                pivotIndex)) {
                 left++;
             }
-            while (left <= right && pool.getKey(right) >= pool.getKey(pivotIndex)) {
+            while (left <= right && pool.getKey(right) >= pool.getKey(
+                pivotIndex)) {
                 right--;
             }
             if (left < right) {
@@ -107,24 +113,27 @@ public class Sorter {
 
 
     public void swap(int index1, int index2) throws IOException {
-        
-        //if i = 4098
-            //add the second blcok of buffers to the pool
-          
+
+        // if i = 4098
+        // add the second blcok of buffers to the pool
+
         Record lRec = pool.getRec(index1);
         Record rRec = pool.getRec(index2);
-        
+
         Record temp = lRec;
-        
+        // System.out.println(lRec.toString());
+        // System.out.println(rRec.toString());
+      //  System.out.println(pool.toString());
+        //System.out.println("index1: " + index1% 1024 + "index2: " + index2% 1024);
         rRec.setKey(lRec.getKeyArray());
         rRec.setValue(lRec.getValueArray());
-        
+
         lRec.setKey(temp.getKeyArray());
         lRec.setValue(temp.getValueArray());
-  
 
     }
-    
+
+
     public void flush() throws IOException {
         pool.flush();
     }
