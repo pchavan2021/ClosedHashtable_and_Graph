@@ -65,21 +65,19 @@ public class Buffer {
      * @param rec
      * @return
      */
-    public boolean add(Record rec, int block) {
-
-        if (data[data.length - 1] != null) {
-            return false;
-        }
+    public void add(Record rec, int block) {
 
         for (int i = 0; i < data.length; i++) {
             if (data[i] == null) {
                 data[i] = rec;
                 currentIndex++;
                 setBlock(block);
-                return true;
+                // possible add entire buffer arrays even though that wouldnt
+                // change it
+
             }
         }
-        return false;
+
     }
 
 
@@ -132,6 +130,12 @@ public class Buffer {
          * This method also increments a counter named diskWrites in a separate
          * Stat class.
          */
+        if (!isDirty) {
+            for (int x = 0; x < data.length; x++) {
+                data[x] = null;
+            }
+            return;
+        }
 
         // System.out.println("TTTTTTTT");
         // write back and increment
