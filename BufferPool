@@ -101,29 +101,50 @@ public class BufferPool {
                 + " INDEX: " + index);
             if (pool[i].getBlock() == bufferArray) {
                 System.out.println("Equal Block");
+                // move to front of buffer
                 return pool[i].getRec(pos);
             }
 
         }
 
+        // pool.leastRecent();
+
         int readIndex = bufferArray * 4096;
-        System.out.println("Full");
+        byte[] blockData = new byte[BLOCK_SIZE];
+        disk.seek(readIndex);
+        disk.readFully(blockData);
 
-        for (int i = 0; i < 1024; i++) {
-
-            byte[] blockData = new byte[4];
-            disk.seek(readIndex);
-            disk.read(blockData);
-
-            Record addRec = new Record();
-            System.arraycopy(blockData, 0, addRec.getKeyArray(), 0,
+        for (int y = 0; y < 4096; y += 4) {
+            Record record = new Record();
+            byte[] keyArray = new byte[2];
+            byte[] valueArray = new byte[2];
+            System.arraycopy(blockData, y, record.getKeyArray(), 0,
                 2);
-            System.arraycopy(blockData, 2, addRec.getValueArray(), 0,
-                2);
+            System.arraycopy(blockData, y + 2, record.getValueArray(),
+                0, 2);
 
-            readIndex = readIndex + 4;
-            insert(addRec, bufferArray);
         }
+
+        /*
+         * int readIndex = bufferArray * 4096;
+         * System.out.println("Full");
+         * 
+         * for (int i = 0; i < 1024; i++) {
+         * 
+         * byte[] blockData = new byte[4];
+         * disk.seek(readIndex);
+         * disk.read(blockData);
+         * 
+         * Record addRec = new Record();
+         * System.arraycopy(blockData, 0, addRec.getKeyArray(), 0,
+         * 2);
+         * System.arraycopy(blockData, 2, addRec.getValueArray(), 0,
+         * 2);
+         * 
+         * readIndex = readIndex + 4;
+         * insert(addRec, bufferArray);
+         * }
+         */
 
         return pool[0].getRec(index % 1024);
         // }
