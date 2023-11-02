@@ -72,6 +72,7 @@ public class Buffer {
                 data[i] = rec;
                 currentIndex++;
                 setBlock(block);
+                break;
                 // possible add entire buffer arrays even though that wouldnt
                 // change it
 
@@ -160,6 +161,11 @@ public class Buffer {
     }
 
 
+    public void setDirty(boolean add) {
+        isDirty = true;
+    }
+
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -192,6 +198,13 @@ public class Buffer {
     public Record[] getData() {
 
         return data;
+    }
+
+
+    public void setRecord(int pos, Record rec) {
+
+        data[pos] = rec;
+
     }
 
 }
