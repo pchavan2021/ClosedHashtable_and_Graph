@@ -86,15 +86,21 @@ public class BufferPool {
             if (pool[i].getBlock() == bufferArray) {
                 // System.out.println("Equal Block");
                 // move to front of buffer
-                return pool[i].getRec(pos);
+                if (i != 0) {
+                    Buffer temp = pool[0];
+                    pool[0] = pool[i];
+                    pool[i] = temp;
+                }
+                return pool[0].getRec(pos);
             }
 
         }
-
+        // System.out.println("Equal Block");
         leastRecent();
-
+        System.out.println("LEAST");
         int readIndex = bufferArray * 4096;
         byte[] blockData = new byte[BLOCK_SIZE];
+
         disk.seek(readIndex);
         disk.readFully(blockData);
 
@@ -120,13 +126,16 @@ public class BufferPool {
                 2);
             System.arraycopy(blockData, y + 2, record.getValueArray(),
                 0, 2);
-
+            // System.out.println(record.getKey());
             addBuffer.add(record, bufferArray);
 
         }
 
         pool[0] = addBuffer;
-
+        for (int u = 0; u < 1024; u++) {
+            System.out.println("INDEX: " + u + " key: " + addBuffer
+                .getKey(u));
+        }
         return pool[0].getRec(index % 1024);
 
     }
@@ -153,6 +162,7 @@ public class BufferPool {
 
         for (int i = 0; i < numberOfBuffers; i++) {
             if (block == pool[i].getBlock()) {
+                // pool[i].toString();
                 return pool[i].getKey(position);
             }
         }
@@ -201,6 +211,22 @@ public class BufferPool {
             fish += pool[x].toString();
         }
         return fish;
+
+    }
+
+
+    public void setRec(int index, Record record) throws IOException {
+        // Calculate block number and offset within the block
+        int bufferArray = index / 4096;
+        int position = index % 1024;
+        for (int i = 0; i < numberOfBuffers; i++) {
+
+            if (pool[i].getBlock() == bufferArray) {
+                pool[i].setRecord(position, record);
+                pool[i].setDirty(true);
+            }
+
+        }
 
     }
 
