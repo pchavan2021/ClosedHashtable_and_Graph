@@ -32,7 +32,9 @@ public class Sorter {
 
         long fileSize = file.length(); // size of the file in bytes
 
-        diskSize = (int)(fileSize / RECORD_SIZE);
+        diskSize = ((int)(fileSize));
+        // System.out.println(diskSize);
+
     }
 
 
@@ -42,7 +44,7 @@ public class Sorter {
 
 
     public void sort() throws IOException {
-        quicksortHelp(0, this.getSize() - 1);
+        quicksortHelp(0, this.getSize() - RECORD_SIZE);
     }
 
 
@@ -60,21 +62,23 @@ public class Sorter {
     private void quicksortHelp(int i, int j) throws IOException {
 
         int pivot = findPivot(i, j);
-
+       // System.out.println("this is the pivot " + pivot);
+        // will put the pivot and j buffer arrays in the pool
         swap(pivot, j);
 
-        int k = partition(i, j - 1, j);
+        int k = partition(i, j - RECORD_SIZE, j);
 
+        // will put the k buffer arrar in the pool, pool already has j
         swap(k, j);
 
-        if ((k - i) > 1) {
+        if ((k - i) > RECORD_SIZE) {
 
-            quicksortHelp(i, k - 1);
+            quicksortHelp(i, k - RECORD_SIZE);
 
         }
 
-        if ((j - k) > 1) {
-            quicksortHelp(k + 1, j);
+        if ((j - k) > RECORD_SIZE) {
+            quicksortHelp(k + RECORD_SIZE, j);
         }
 
     }
@@ -82,7 +86,7 @@ public class Sorter {
 
     private int findPivot(int i, int j) {
 
-        return (i + j) / 2;
+        return i + (int)((j - i) / RECORD_SIZE / 2) * RECORD_SIZE;
     }
 
 
@@ -95,16 +99,20 @@ public class Sorter {
 
             while (left <= right && pool.getKey(left) < pool.getKey(
                 pivotIndex)) {
-                left++;
+                // left++;
+                left += RECORD_SIZE;
             }
             while (left <= right && pool.getKey(right) >= pool.getKey(
                 pivotIndex)) {
-                right--;
+                // right--;
+                right -= RECORD_SIZE;
             }
             if (left < right) {
                 swap(left, right);
-                left++;
-                right--;
+                // left++;
+                // right--;
+                left += RECORD_SIZE;
+                right -= RECORD_SIZE;
             }
         }
 
@@ -114,28 +122,21 @@ public class Sorter {
 
     public void swap(int index1, int index2) throws IOException {
 
-        // if i = 4098
-        // add the second blcok of buffers to the pool
+        // System.out.println("index1: " + index1 + "index2: " + index2);
+        byte[] lRec = pool.getRec(index1);
+        byte[] rRec = pool.getRec(index2);
 
-        Record lRec = pool.getRec(index1);
-        Record rRec = pool.getRec(index2);
-
-        Record temp = lRec;
-        // System.out.println(lRec.toString());
-        // System.out.println(rRec.toString());
-      //  System.out.println(pool.toString());
-        //System.out.println("index1: " + index1% 1024 + "index2: " + index2% 1024);
-        rRec.setKey(lRec.getKeyArray());
-        rRec.setValue(lRec.getValueArray());
-
-        lRec.setKey(temp.getKeyArray());
-        lRec.setValue(temp.getValueArray());
-
+        pool.setRec(index2, lRec);
+        // may not be setting right its using the same buffer but bytes could be
+        // in different ones
+        pool.setRec(index1, rRec);
+        
     }
 
 
     public void flush() throws IOException {
-        pool.flush();
+       pool.printplz();
+       pool.flush();
     }
 
 }
