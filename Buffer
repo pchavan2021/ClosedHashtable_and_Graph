@@ -13,9 +13,10 @@ public class Buffer {
     private int buff;
 
     // array of records
-    private Record[] data;
+    private byte[] data;
     private RandomAccessFile disk;
-    private final static int BLOCK_SIZE = 4096 / 4;
+    private final static int BLOCK_SIZE = 4096;
+
     // private final static int RECORD_SIZE = 4;
     private long position; // postiton in the file
     private boolean isDirty;
@@ -30,7 +31,7 @@ public class Buffer {
      */
     public Buffer(RandomAccessFile disk) {
 
-        data = new Record[BLOCK_SIZE];
+        data = new byte[BLOCK_SIZE];
         this.disk = disk;
         // this.buff = block;
         this.isDirty = false;
@@ -42,8 +43,15 @@ public class Buffer {
     }
 
 
-    public Record getRec(int index) {
-        return data[index];
+    public byte[] getRec(int index) {
+        byte[] result = new byte[4];
+        System.arraycopy(data, index, result, 0, 4);
+        return result;
+    }
+
+
+    public short getKey(byte[] bytes) {
+        return (short)((bytes[0] << 8) | (bytes[1] & 0xFF));
     }
 
 
@@ -52,49 +60,31 @@ public class Buffer {
      * 
      * @return data
      */
-    public Record[] readBlock() {
-
+    public byte[] getBuffer() {
         return data;
     }
 
 
-    /**
-     * if the last spot is full return that record
-     * if the the spot was empty return null;
-     * 
-     * @param rec
-     * @return
-     */
-    public void add(Record rec, int block) {
-
-        for (int i = 0; i < data.length; i++) {
-            if (data[i] == null) {
-                data[i] = rec;
-                currentIndex++;
-                setBlock(block);
-                break;
-                // possible add entire buffer arrays even though that wouldnt
-                // change it
-
-            }
-        }
+    public void add(byte[] rec, int block) {
+        System.arraycopy(rec, 0, data, 0, 4096);
+        // currentIndex++;
+        setBlock(block);
+      //  System.out.println(blockInFile);
+        // isDirty = true; // probabaly delete
 
     }
 
 
-    public byte[] getKeyArray(int index) {
-        return data[index].getKeyArray();
+    public short getKey(int pos) {
+        byte[] key = new byte[2];
+        System.arraycopy(data, pos, key, 0, 2);
+        return toShort(key);
+
     }
 
 
-    public byte[] getValueArray(int index) {
-        return data[index].getKeyArray();
-    }
-
-
-    public short getKey(int index) {
-        // System.out.println("FISHIE" + index);
-        return data[index].getKey();
+    private static short toShort(byte[] bytes) {
+        return (short)((bytes[0] << 8) | (bytes[1] & 0xFF));
     }
 
 
@@ -109,102 +99,51 @@ public class Buffer {
     }
 
 
-    public short getValue(int index) {
-        return data[index].getValue();
-    }
-
-
-    public void write(Record[] newData) {
-        // Sets new data to the buffer and marks the buffer as dirty,
-        // indicating that the buffer contents have been modified.
-        data = newData;
-        isDirty = true;
-
-    }
 
 
     public void writeBack() throws IOException {
         /**
+         * 
          * If the buffer is dirty (i.e., its data was modified),
          * it writes the buffer's data back to the disk at the appropriate
          * position.
          * This method also increments a counter named diskWrites in a separate
          * Stat class.
          */
+        // System.out.println("GERE" + isDirty);
         if (!isDirty) {
-            for (int x = 0; x < data.length; x++) {
-                data[x] = null;
-            }
+
+            Arrays.fill(data, (byte)0);
             return;
         }
 
         // System.out.println("TTTTTTTT");
         // write back and increment
-        disk.seek(position); // should be current pos
-        for (int x = 0; x < data.length; x++) {
-            if (data[x] != null) {
-                byte[] recordBytes = data[x].toByteArray();
-                disk.write(recordBytes);
-            }
-            data[x] = null;
-        }
+        disk.seek(blockInFile * 4096); // should be current pos
+        disk.write(data);
+
+        // hopefully this isn't problematic
+        Arrays.fill(data, (byte)0);
         isDirty = false;
 
     }
 
 
-    public long block() {
-        /**
-         * Returns the block index associated with this buffer.
-         */
-        return position;
-    }
-
-
     public void setDirty(boolean add) {
-        isDirty = true;
+        isDirty = add;
     }
 
 
-    @Override
+    public void setRecord(int pos, byte[] rec) {
+        System.arraycopy(rec, 0, data, pos, 4);
+        // isDirty = true;
+
+    }
+
+
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-
-        // Include buffer info
-        sb.append("Buffer Position: ").append(position).append("\n");
-        sb.append("Is Dirty: ").append(isDirty).append("\n");
-
-        // Summarize the records in the buffer
-        sb.append("Records:\n");
-        for (int i = 0; i < data.length; i++) {
-            if (data[i] != null) {
-                sb.append("Index ").append(i).append(": ");
-                sb.append(data[i].toString()).append("\n");
-            }
-            else {
-                sb.append("Index ").append(i).append(": Empty\n");
-            }
-        }
-
-        return sb.toString();
+        return "Buffer Information:\n" + "Block: " + blockInFile
+            + "\n" + "Is Dirty: " + isDirty + "\n" + "Data: " + Arrays
+                .toString(data);
     }
-
-
-    public int getCurrentIndex() {
-        return currentIndex;
-    }
-
-
-    public Record[] getData() {
-
-        return data;
-    }
-
-
-    public void setRecord(int pos, Record rec) {
-
-        data[pos] = rec;
-
-    }
-
 }
