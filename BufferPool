@@ -70,23 +70,21 @@ public class BufferPool {
      * 
      */
 
-    public Record getRec(int index) throws IOException {
-        // System.out.println("index " + index);
-        int bufferArray = index / 4096;
-        int pos = index % 1024;
-        // System.out.println("bufferArray " + bufferArray);
-        // System.out.println("pos " + pos);
+    public byte[] getRec(int index) throws IOException {
+        int block = index / BLOCK_SIZE;
+        int pos = index % BLOCK_SIZE;
 
-        // get a buffer for a specific block from the pool.
-        // boolean found = pool.search(block);
         for (int i = 0; i < numberOfBuffers; i++) {
             // System.out.println("I: " + i + "" + " BLCOKS: " + pool[i]
             // .getBlock() + " BUFFERARRAY: " + bufferArray
             // + " INDEX: " + index);
-            if (pool[i].getBlock() == bufferArray) {
+
+            if (pool[i].getBlock() == block) {
+
                 // System.out.println("Equal Block");
                 // move to front of buffer
                 if (i != 0) {
+                    // shift instead of swapping
                     Buffer temp = pool[0];
                     pool[0] = pool[i];
                     pool[i] = temp;
@@ -97,46 +95,16 @@ public class BufferPool {
         }
         // System.out.println("Equal Block");
         leastRecent();
-        System.out.println("LEAST");
-        int readIndex = bufferArray * 4096;
+        // System.out.println("LEAST");
+        int readIndex = block * 4096;
         byte[] blockData = new byte[BLOCK_SIZE];
 
         disk.seek(readIndex);
         disk.readFully(blockData);
 
-        /*
-         * for (int y = 0; y < 4096; y += 4) {
-         * Record record = new Record();
-         * 
-         * System.arraycopy(blockData, y, record.getKeyArray(), 0,
-         * 2);
-         * System.arraycopy(blockData, y + 2, record.getValueArray(),
-         * 0, 2);
-         * 
-         * pool[0].add(record, bufferArray);
-         * 
-         * }
-         */
-        Buffer addBuffer = new Buffer(disk);
+        pool[0].add(blockData, block);
 
-        for (int y = 0; y < 4096; y += 4) {
-            Record record = new Record();
-
-            System.arraycopy(blockData, y, record.getKeyArray(), 0,
-                2);
-            System.arraycopy(blockData, y + 2, record.getValueArray(),
-                0, 2);
-            // System.out.println(record.getKey());
-            addBuffer.add(record, bufferArray);
-
-        }
-
-        pool[0] = addBuffer;
-        for (int u = 0; u < 1024; u++) {
-            System.out.println("INDEX: " + u + " key: " + addBuffer
-                .getKey(u));
-        }
-        return pool[0].getRec(index % 1024);
+        return pool[0].getRec(pos);
 
     }
 
@@ -147,27 +115,34 @@ public class BufferPool {
         for (int x = numberOfBuffers - 2; x >= 0; x--) {
             pool[x + 1] = pool[x];
         }
-        pool[0] = null;
+//
+// byte[] empty = new byte[BLOCK_SIZE];
+// pool[0].add(empty, -1);
+
     }
 
 
     public short getKey(int index) {
 
-        // return the key for the specific record at the
-        // given directions
-        // System.out.println(index);
-
-        int block = index / 1024;
-        int position = index % 1024;
+        int block = index / BLOCK_SIZE;
+        int pos = index % BLOCK_SIZE;
 
         for (int i = 0; i < numberOfBuffers; i++) {
             if (block == pool[i].getBlock()) {
                 // pool[i].toString();
-                return pool[i].getKey(position);
+                return pool[i].getKey(pos);
             }
         }
         return 0;
 
+    }
+
+
+    public void printplz() {
+        for (int x = 0; x < numberOfBuffers; x++) {
+            System.out.println("buffer: " + numberOfBuffers
+                + " value: " + pool[x].toString());
+        }
     }
 
 
@@ -186,23 +161,6 @@ public class BufferPool {
     }
 
 
-    public byte[] getKeyArray(int index) {
-        int block = index / BLOCK_SIZE;
-        int position = index % BLOCK_SIZE;
-
-        return pool[block].getKeyArray(position);
-
-    }
-
-
-    public byte[] getValueArray(int index) {
-        int block = index / BLOCK_SIZE;
-        int position = index % BLOCK_SIZE;
-
-        return pool[block].getKeyArray(position);
-    }
-
-
     @Override
     public String toString() {
         String fish = "test";
@@ -215,15 +173,17 @@ public class BufferPool {
     }
 
 
-    public void setRec(int index, Record record) throws IOException {
-        // Calculate block number and offset within the block
-        int bufferArray = index / 4096;
-        int position = index % 1024;
+    public void setRec(int index, byte[] record) throws IOException {
+
+        int block = index / BLOCK_SIZE;
+        int pos = index % BLOCK_SIZE;
+
         for (int i = 0; i < numberOfBuffers; i++) {
 
-            if (pool[i].getBlock() == bufferArray) {
-                pool[i].setRecord(position, record);
+            if (pool[i].getBlock() == block) {
+                pool[i].setRecord(pos, record);
                 pool[i].setDirty(true);
+
             }
 
         }
