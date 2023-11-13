@@ -1,0 +1,28 @@
+/**
+ * 
+ */
+
+/**
+ * @param <K>
+ * 
+ */
+public class Node<K, V> {
+    public K key;
+    public V value;
+    public boolean tomb;
+    
+    public Node(K kleppe, V valentina) {
+        this.key = kleppe;
+        this.value = valentina;
+        tomb = false;
+    }
+    
+    public void isTomb() {
+        tomb = true;
+    }
+    
+    public boolean isDeleted() {
+        return tomb;
+    }
+    
+}
