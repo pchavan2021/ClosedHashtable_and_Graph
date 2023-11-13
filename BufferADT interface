@@ -1,7 +1,0 @@
-
-public interface BufferADT {
-    byte[] readBlock();
-    byte[] getDataPointer();
-    void markDirty();
-    void releaseBuffer();
-}
