@@ -94,36 +94,49 @@ public class HashTable<K, V> {
      * @return a true if the artist is already in the hashtable
      * @throws Exception
      */
+    /**
+     * 
+     * @param key
+     *            this represents the key value
+     * @param value
+     *            this the seminar
+     * @param hand
+     *            this is the associated handle that you'll u se in the
+     *            memManager
+     * @return a true if the artist is already in the hashtable
+     * @throws Exception
+     */
     public boolean insert(K key, V value, String temp)
         throws Exception {
 
         // doubles the table if the table is more than %50 full
         if (size >= (hashSize / 2)) {
             doubleTable();
-            
+
             if (song) {
                 System.out.println("Song hash table size doubled.");
             }
             else {
                 System.out.println("Artist hash table size doubled.");
             }
-            
+
         }
 
         // creating hashing values based on key
-        int hashing1 = compute.h(key, hashSize);
-     
+        int hash = Hash.h((String)key, hashSize);
+
         int i = 0;
-        
+
         while (i < hashSize) {
-            int probe = (hash + i * i) % capacity;
+            int probe = (hash + i * i) % hashSize;
             Node<K, V> entry = table[probe];
-            
-            if (entry == null || entry.isDeleted) {
+
+            if (entry == null || entry.isDeleted()) {
                 table[probe] = new Node<>(key, value);
                 size++;
-              
-            } else if (entry.key.equals(key)) {
+
+            }
+            else if (entry.key.equals(key)) {
                 if (song) {
                     System.out.println("|" + temp + "<SEP>" + key
                         + "| duplicates a record already in the database.");
@@ -138,25 +151,12 @@ public class HashTable<K, V> {
             }
 
             i++;
-        
-        
 
+        }
 
-    }
-    // assign the spot in the hashtable to the new entry
-    table[hashing1]=new Node(key,value,false);
-
-    size++;
-
-    if(song)
-    {
-        System.out.println("|" + key + "| is added to the Song database.");
-    }else
-    {
-        System.out.println("|" + key + "| is added to the Artist database.");
+        return false;
     }
 
-    }
 
     /**
      * Deletes a seminar from the hashtable
@@ -165,28 +165,29 @@ public class HashTable<K, V> {
      *            this the key value
      * @return whether the deletion was successful or not
      */
-    public boolean delete(int key) {
+    public boolean delete(K key) {
         // retreive the hashtable index
         int index = findIndex(key);
 
         // if the record doesn't exist
         if (index == -1) {
 
-            System.out.println("Delete FAILED -- " + "There is no reco"
-                + "rd with ID " + key);
+            System.out.println("Delete FAILED -- "
+                + "There is no reco" + "rd with ID " + key);
             return false;
 
         } // if there is a record with that key
-        else if (table[index].key == key) {
+        else if (table[index].key.equals(key) && !table[index].tomb) {
 
             table[index].tomb = true;
             size--;
             System.out.println("Record with ID " + key + " successfu"
                 + "lly deleted from the database");
             table[index].value = null;
+            return true;
 
         }
-        return true;
+        return false;
 
     }
 
@@ -202,15 +203,15 @@ public class HashTable<K, V> {
         int index = findIndex(key);
 
         if (index == -1 || table[index].tomb) {
-            System.out.println("Search FAILED -- There is no re" + "co"
-                + "rd with ID " + key);
+            System.out.println("Search FAILED -- There is no re"
+                + "co" + "rd with ID " + key);
             return false;
 
         }
         else if (table[index].key == key && table[index] != null) {
             if (table[index].value != null) {
-                System.out.println("Found record with ID " + table[index].key
-                    + ":");
+                System.out.println("Found record with ID "
+                    + table[index].key + ":");
                 System.out.println(table[index].value.toString());
             }
             else {
@@ -280,24 +281,25 @@ public class HashTable<K, V> {
      *            this
      * @return the hashing index
      */
-    public int findIndex(int key) {
-        // first hashing value
-        int hash = compute.h(key, hashSize);
-
+    public int findIndex(K key) {
+        int hash1 = Hash.h((String)key, hashSize);
         int i = 0;
 
-        while (table[hashing1] != null && i < hashSize) {
+        while (i < hashSize) {
+            int probe = (hash1 + i * i) % hashSize;
+            Node<K, V> entry = table[probe];
 
-            if (table[hashing1].key == key) {
-                return hashing1;
+            if (entry == null) {
+                return -1;
             }
-            hashing1 = (hashing1 + hashing2) % table.length;
+            else if (!entry.tomb && entry.key.equals(key)) {
+                return probe;
+
+            }
             i++;
 
         }
-
-        return -1; // key not found
-
+        return -1;
     }
 
 
@@ -314,11 +316,13 @@ public class HashTable<K, V> {
                 if (table[x] != null) {
 
                     if (table[x].tomb) {
-                        System.out.println("" + x + ": " + "TOMBSTONE");
+                        System.out.println("" + x + ": "
+                            + "TOMBSTONE");
                     }
                     else {
 
-                        System.out.println("" + x + ": " + table[x].key + "");
+                        System.out.println("" + x + ": "
+                            + table[x].key + "");
 
                     }
 
