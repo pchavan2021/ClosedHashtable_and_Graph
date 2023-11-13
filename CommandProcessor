@@ -1,1 +1,122 @@
-C
+
+import java.io.*;
+import java.util.*;
+import java.util.Scanner;
+
+/**
+ * 
+ *
+ * @author Evan Howe (evanhowe03)
+ * @author Pallavi Chavan (Pallucha21)
+ * @version 10/10/23
+ */
+public class CommandProcessor {
+
+    /**
+     * this is where everthing is processed
+     * 
+     * @param size
+     *            the size
+     * @param file
+     *            the file
+     * @throws Exception
+     *             in case of wrong inputs
+     */
+    public CommandProcessor(int size, String file) throws Exception {
+
+        try {
+
+            Scanner scanner = new Scanner(new File(file));
+
+            while (scanner.hasNext()) {
+                String word = scanner.next().trim();
+
+                try {
+                    if (word.equalsIgnoreCase("insert")) {
+                        insert(scanner);
+                    }
+
+                    else if (word.equalsIgnoreCase("remove")) {
+                        remove(scanner);
+                    }
+                    else if (word.equalsIgnoreCase("print")) {
+                        print(scanner);
+                    }
+                    else {
+                        System.out.println("Unknown command: "
+                            + word);
+                    }
+                }
+                catch (java.util.InputMismatchException e) {
+                    System.out.println("Input is not valid.");
+
+                }
+            }
+
+            scanner.close();
+        }
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+    /**
+     * 
+     * @param scanner
+     *            scanner to scan more values
+     * @throws Exception
+     *             in case of bad input
+     */
+    public void insert(Scanner scanner) throws Exception {
+        String line = scanner.nextLine();
+        String[] parts = line.split("<SEP>", 2);
+        String artist = parts[0];
+        String song = parts[1];
+    }
+
+
+    /**
+     * 
+     * @param scanner
+     *            the scanner
+     */
+    public void remove(Scanner scanner) {
+        String remove = scanner.next();
+        switch (remove) {
+            case "song":
+                String song = scanner.nextLine();
+                break;
+            case "artist":
+                String artist = scanner.nextLine();
+                break;
+            default:
+                System.out.println("Uh oh you messed up somewhere");
+                break;
+
+        }
+    }
+
+
+    public void print(Scanner scanner) {
+        String printType = scanner.next(); // Read the print type (song, artist,
+                                           // or graph)
+
+        switch (printType.toLowerCase()) {
+            case "song":
+
+                break;
+            case "artist":
+
+                break;
+            case "graph":
+
+                break;
+            default:
+                System.out.println("UH OH WRONG PRINT");
+                break;
+        }
+    }
+
+}
