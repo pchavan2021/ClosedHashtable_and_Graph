@@ -11,6 +11,8 @@ import java.util.Scanner;
  * @version 10/10/23
  */
 public class CommandProcessor {
+    private HashTable song;
+    private HashTable artist;
 
     /**
      * this is where everthing is processed
@@ -24,6 +26,8 @@ public class CommandProcessor {
      */
     public CommandProcessor(int size, String file) throws Exception {
 
+        song = new HashTable(size, true);
+        artist = new HashTable(size, false);
         try {
 
             Scanner scanner = new Scanner(new File(file));
@@ -64,16 +68,22 @@ public class CommandProcessor {
 
     /**
      * 
+     * @param <K>
      * @param scanner
      *            scanner to scan more values
      * @throws Exception
      *             in case of bad input
      */
+    @SuppressWarnings("unchecked")
     public void insert(Scanner scanner) throws Exception {
         String line = scanner.nextLine();
         String[] parts = line.split("<SEP>", 2);
-        String artist = parts[0];
-        String song = parts[1];
+        String art = parts[0];
+        String son = parts[1];
+
+        artist.insert(art, son, art);
+        song.insert(son, art, son);
+        System.out.println("INSERTED");
     }
 
 
@@ -96,6 +106,7 @@ public class CommandProcessor {
                 break;
 
         }
+        System.out.println("remove");
     }
 
 
@@ -117,6 +128,7 @@ public class CommandProcessor {
                 System.out.println("UH OH WRONG PRINT");
                 break;
         }
+        System.out.println("PRint");
     }
 
 }
