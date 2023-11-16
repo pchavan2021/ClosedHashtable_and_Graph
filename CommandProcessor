@@ -86,9 +86,12 @@ public class CommandProcessor {
         String art = parts[0].trim();
         String son = parts[1].trim();
 
-        boolean fish = artist.insert(art, son, art, false);
-
-        song.insert(son, art, son, fish);
+        boolean artistInserted = artist.insert(art, son, true);
+        if (song.findIndex(son) == -1) { // Only insert if the song is not found
+            song.insert(son, art, true);
+        }
+        
+        
         // System.out.println("INSERTED");
     }
 
