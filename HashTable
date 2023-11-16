@@ -57,31 +57,29 @@ public class HashTable<K, V> {
      * new one
      */
     private void doubleTable() {
-        // Save the old hash table and its size
-        Node[] oldTable = table;
+        Node<K, V>[] oldTable = table;
         int oldSize = hashSize;
 
-        // Double the size of the hash table
         hashSize *= 2;
         table = new Node[hashSize];
 
-        // Reset size to 0 since it will be recalculated during rehashing
-        size = 0;
-
-        // Rehash all non-null and non-deleted nodes
         for (int i = 0; i < oldSize; i++) {
             if (oldTable[i] != null && !oldTable[i].isDeleted()) {
-                try {
-                    // Reinsert using the insert method to handle hashing and
-                    // collision
+                K key = oldTable[i].key;
+                V value = oldTable[i].value;
 
-                    insert(oldTable[i].getKey(), oldTable[i]
-                        .getValue(), oldTable[i].getKey(), true);
+                int hash = Hash.h((String)key, hashSize);
+                int j = 0;
+
+                while (j < hashSize) {
+                    int probe = (hash + j * j) % hashSize;
+                    if (table[probe] == null) {
+                        table[probe] = new Node<>(key, value);
+                        break;
+                    }
+                    j++;
                 }
-                catch (Exception e) {
-                    // Handle any exceptions that may occur during reinsertion
-                    e.printStackTrace();
-                }
+
             }
         }
     }
