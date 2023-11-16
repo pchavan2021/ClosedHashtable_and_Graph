@@ -86,8 +86,9 @@ public class CommandProcessor {
         String art = parts[0].trim();
         String son = parts[1].trim();
 
-        artist.insert(art, son, art);
-        song.insert(son, art, son);
+        boolean fish = artist.insert(art, son, art, false);
+
+        song.insert(son, art, son, fish);
         // System.out.println("INSERTED");
     }
 
