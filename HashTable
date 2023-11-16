@@ -57,28 +57,33 @@ public class HashTable<K, V> {
      * new one
      */
     private void doubleTable() {
-        // the size of the hashTable now
-        int oldSize = hashSize;
-        // a copy of the table now
+        // Save the old hash table and its size
         Node[] oldTable = table;
+        int oldSize = hashSize;
 
-        hashSize = hashSize * 2;
-        // the now hashtable
-        // has double the capacity
+        // Double the size of the hash table
+        hashSize *= 2;
         table = new Node[hashSize];
 
-        // Rehash all existing entries into the new table
+        // Reset size to 0 since it will be recalculated during rehashing
+        size = 0;
+
+        // Rehash all non-null and non-deleted nodes
         for (int i = 0; i < oldSize; i++) {
-            if (oldTable[i] != null) {
+            if (oldTable[i] != null && !oldTable[i].isDeleted()) {
+                try {
+                    // Reinsert using the insert method to handle hashing and
+                    // collision
 
-                int hash1 = Hash.h((String)oldTable[i].key, hashSize);
-
-                table[hash1] = oldTable[i];
-
+                    insert(oldTable[i].getKey(), oldTable[i]
+                        .getValue(), oldTable[i].getKey(), true);
+                }
+                catch (Exception e) {
+                    // Handle any exceptions that may occur during reinsertion
+                    e.printStackTrace();
+                }
             }
-
         }
-
     }
 
 
@@ -106,7 +111,7 @@ public class HashTable<K, V> {
      * @return a true if the artist is already in the hashtable
      * @throws Exception
      */
-    public boolean insert(K key, V value, String temp)
+    public boolean insert(K key, V value, String temp, boolean fish)
         throws Exception {
         // Check if resizing is needed
         if (size >= (hashSize / 2)) {
@@ -131,26 +136,37 @@ public class HashTable<K, V> {
             if (entry == null || entry.isDeleted()) {
                 table[probe] = new Node<>(key, value);
                 size++;
+                if (song) {
+                    System.out.println("|" + key + "|"
+                        + " is added to the Song database.");
+                    table[probe].setTomb(false);
+                }
+                else {
+                    System.out.println("|" + key + "|"
+                        + " is added to the Artist database.");
+                    table[probe].setTomb(false);
+                }
                 return true;
             }
 
             // Check for duplicate keys
-            else if (entry.key.equals(key)) {
-                if (song) {
-                    System.out.println("|" + temp + "<SEP>" + key
+            else if (entry.key.equals(key) && !fish) {
+                if (song && entry.value.equals(value)) {
+                    System.out.println("|" + value + "<SEP>" + key
                         + "| duplicates a record already in the Song database.");
                 }
-                else {
-                    System.out.println("|" + key + "<SEP>" + temp
-                        + "| duplicates a record already in the Artist database.");
+                if (temp.equalsIgnoreCase("insert")) {
+                    table[probe] = new Node<>(key, value);
+                    table[probe].setTomb(false);
+                    System.out.println("|" + key + "|"
+                        + " is added to the Song database.");
                 }
-                return false; // Duplicate found, no insertion
+                return false;
             }
 
             i++;
         }
 
-    
         throw new Exception("HashTable is full");
     }
 
@@ -163,26 +179,37 @@ public class HashTable<K, V> {
      * @return whether the deletion was successful or not
      */
     public boolean delete(K key) {
-      
+
         int index = findIndex(key);
 
-    
         if (index == -1) {
-            System.out.println(
-                "Delete FAILED -- There is no record with ID " + key);
+            if (song) {
+                System.out.println("|" + key
+                    + "| does not exist in the Song database.");
+            }
+            else {
+                System.out.println("|" + key
+                    + "| does not exist in the Artist database.");
+            }
+
             return false;
         }
 
-    
         Node<K, V> entry = table[index];
         if (entry.key.equals(key) && !entry.isDeleted()) {
-       
-            size--; 
-            System.out.println("Record with ID " + key
-                + " successfully deleted from the database");
+            table[index].setTomb(true);
+            size--;
+            if (song) {
+                System.out.println("|" + key
+                    + "| is removed from the Song databse.");
+            }
+            else {
+                System.out.println("|" + key
+                    + "| is removed from the Artist databse.");
+            }
+
             return true;
         }
-
 
         return false;
     }
@@ -266,24 +293,22 @@ public class HashTable<K, V> {
      *            take in the string "hashtable" or "blocks"
      * @return whether it was requested to print blocks or hashtable
      */
-    public boolean print() {
+    public int print() {
 
-        System.out.println("Hashtable:");
         for (int x = 0; x < hashSize; x++) {
             if (table[x] != null) {
                 if (table[x].tomb) {
                     System.out.println("" + x + ": TOMBSTONE");
                 }
                 else {
-                    System.out.println("" + x + ": " + table[x].key);
+                    System.out.println("" + x + ": |" + table[x].key
+                        + "|");
                 }
             }
-            else {
-                System.out.println("" + x + ": EMPTY");
-            }
+
         }
-        System.out.println("total records: " + size);
-        return true;
+
+        return size;
 
     }
 }
