@@ -3,8 +3,8 @@
  * Main for Graph project (CS3114/CS5040 Fall 2023 Project 4).
  * Usage: java GraphProject <init-hash-size> <command-file>
  *
- * @author {Your Name Here}
- * @version {Put Something Here}
+ * @author pallucha21 and evanhowe03
+ * @version 1.0
  *
  */
 
@@ -44,8 +44,8 @@ public class GraphProject {
 
         }
         else {
-            CommandProcessor hello = new CommandProcessor(2,
-                "P4sampleInput.txt");
+            CommandProcessor hello = new CommandProcessor(10,
+                "testRemove.txt");
 
         }
         // This is the main file for the program.
