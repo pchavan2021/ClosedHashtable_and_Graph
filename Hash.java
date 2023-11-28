@@ -1,8 +1,8 @@
 /**
  * Hash table class
  *
- * @author <Put Something Here>
- * @version <Put Something Here>
+ * @author pallucha21 and evanhowe03
+ * @version 1.0
  */
 
 public class Hash
