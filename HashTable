@@ -14,10 +14,9 @@ public class HashTable<K, V> {
     private boolean song;
 
     /**
-     * HashTable constructor
-     * 
-     * @param initialHashSize
-     *            this is the size of the hash table
+     * HashTbale constructor
+     * @param initialHashSize intial hashSize
+     * @param which boolean 
      */
     public HashTable(int initialHashSize, boolean which) {
 
@@ -37,17 +36,6 @@ public class HashTable<K, V> {
         return hashSize;
     }
 
-
-    /**
-     * public int sfold(String s, int M) {
-     * long sum = 0, mul = 1;
-     * for (int i = 0; i < s.length(); i++) {
-     * mul = (i % 4 == 0) ? 1 : mul * 256;
-     * sum += s.charAt(i) * mul;
-     * }
-     * return (int)(Math.abs(sum) % M);
-     * }
-     **/
 
     /**
      * this doubles the hashtable by creating an empt y hashtable that's double
@@ -87,26 +75,11 @@ public class HashTable<K, V> {
 
     /**
      * 
-     * @param key
-     *            this represents the key value
-     * @param value
-     *            this the seminar
-     * @param hand
-     *            this is the associated handle that you'll u se in the
-     *            memManager
-     * @return a true if the artist is already in the hashtable
-     * @throws Exception
-     */
-    /**
-     * 
-     * @param key
-     *            this represents the key value
-     * @param value
-     *            this the seminar
-     * @param hand
-     *            this is the associated handle that you'll u se in the
-     *            memManager
-     * @return a true if the artist is already in the hashtable
+     * @param key this is the key
+     * @param value this is the value
+     * @param fish this is the boolean
+     * @return whether insertion was
+     * succesful
      * @throws Exception
      */
     public boolean insert(K key, V value, boolean fish)
@@ -217,6 +190,11 @@ public class HashTable<K, V> {
         return false; // Key not found, deletion unsuccessful
     }
     
+    /**
+     * 
+     * @param key thuis ishte key
+     * @return the index
+     */
     public int findIndex(K key) {
         int hash = Hash.h((String)key, hashSize); // Initial hash computation
         int i = 0;
