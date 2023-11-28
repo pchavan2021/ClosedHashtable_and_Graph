@@ -86,13 +86,11 @@ public class CommandProcessor {
         String art = parts[0].trim();
         String son = parts[1].trim();
 
-        boolean artistInserted = artist.insert(art, son, true);
+        artist.insert(art, son, true);
         if (song.findIndex(son) == -1) { // Only insert if the song is not found
             song.insert(son, art, true);
         }
         
-        
-        // System.out.println("INSERTED");
     }
 
 
@@ -120,7 +118,10 @@ public class CommandProcessor {
         // System.out.println("remove");
     }
 
-
+    /**
+     * print method
+     * @param scanner Scanner
+     */
     public void print(Scanner scanner) {
         String printType = scanner.next(); // Read the print type (song, artist,
                                            // or graph)
