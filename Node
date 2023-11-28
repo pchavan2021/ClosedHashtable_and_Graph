@@ -3,24 +3,51 @@
  */
 
 /**
- * @param <K>
+ * @author Pallavi Chavan pallucha21 and Evan Howe evanhowe03
+ * @version 09/14/23
  * 
+ * @param <K> artist/song 
+ * @param <V> node from the graph
  */
 public class Node<K, V> {
     public K key;
     public V value;
     public boolean tomb;
     
+   // K is the string of the artist.song
+    
+   // V is the value of the graph node
+    
+    /**
+     * node class construtor
+     * @param kleppe key
+     * @param valentina value
+     */
     public Node(K kleppe, V valentina) {
         this.key = kleppe;
         this.value = valentina;
         tomb = false;
     }
     
+    /**
+     * is tomb method
+     */
     public void isTomb() {
-        tomb = true;
+        tomb = true;           
     }
     
+    /**
+     * set tomb method
+     * @param set boolean
+     */
+    public void setTomb(boolean set) {
+        tomb = set;
+    }
+    
+    /**
+     * isDeleted method
+     * @return a boolean
+     */
     public boolean isDeleted() {
         return tomb;
     }
