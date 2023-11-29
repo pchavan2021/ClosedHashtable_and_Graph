@@ -1,0 +1,182 @@
+public class Graph<E> {
+
+    private GraphNode[] graphArray;
+    int graphSize;
+    private int edgeCount;
+    private int verticeCount;
+
+    // No real constructor needed
+    public Graph(int n) {
+        graphArray = new GraphNode[n];
+        graphSize = n;
+        edgeCount = 0;
+        verticeCount = 0;
+
+    }
+
+
+    // Return the number of vertices
+    public int verticeCount() {
+        return verticeCount;
+    }
+
+
+    // Return the current number of edges
+    public int totalEdgeCount() {
+
+        return edgeCount;
+    }
+
+
+    // Get the value of node with index v
+    public SinglyLinkedList getValue(int v) {
+        return (SinglyLinkedList)graphArray[v].getValue();
+    }
+
+
+    // Set the value of node with index v
+    public void setValue(int v, SinglyLinkedList val) {
+        graphArray[v].setValue(val);
+    }
+
+    public void expandGraph() {
+        
+    }
+
+    public void insert(String artistAdd, String songAdd) {
+        int artistIndex = -10;
+        int songIndex = -10;
+
+        for (int i = 0; i < graphArray.length; i++) {
+            if (graphArray[i].getKey().equals(artistAdd)) {
+                artistIndex = i;
+            }
+            else if (graphArray[i].getKey().equals(songAdd)) {
+                songIndex = i;
+            }
+        }
+
+        /**
+         * if artist node and song node exists in the graph
+         * add an edge between the two
+         */
+        if (artistIndex >= 0 && songIndex >= 0) {
+            addEdge(artistIndex, songIndex);
+        }
+        else if (artistIndex >= 0 && songIndex < 0) {
+            /**
+             * artist node in the graph but the song isn't
+             * create a new vertex for the song
+             * add an edge for the song node and for the artist node
+             * 
+             * vice versa
+             */
+
+            GraphNode addNode = new GraphNode(verticeCount);
+            addNode.setKey(songAdd);
+
+            graphArray[verticeCount] = addNode;
+            addEdge(artistIndex, songIndex);
+
+            verticeCount++;
+        }
+        else if (artistIndex < 0 && songIndex >= 0) {
+            GraphNode addNode = new GraphNode(verticeCount);
+            addNode.setKey(artistAdd);
+
+            graphArray[verticeCount] = addNode;
+
+            addEdge(artistIndex, songIndex);
+
+            verticeCount++;
+        }
+        else if (artistIndex < 0 && songIndex < 0) {
+            // neither the artist or song exist in the graph as nodes
+            // add the artist and song nodes to the graoh
+            // make the edges between them
+            GraphNode addArtistNode = new GraphNode(verticeCount);
+            addArtistNode.setKey(artistAdd);
+            graphArray[verticeCount] = addArtistNode;
+            verticeCount++;
+
+            GraphNode addSongNode = new GraphNode(verticeCount);
+            addSongNode.setKey(songAdd);
+            graphArray[verticeCount] = addSongNode;
+            verticeCount++;
+
+            addEdge(artistIndex, songIndex);
+
+        }
+    }
+
+
+    // Adds a new edge from node v to node w
+    public void addEdge(int v, int w) {
+        SinglyLinkedList<Integer> songList = graphArray[v].getValue();
+        SinglyLinkedList<Integer> artistList = graphArray[w].getValue();
+
+        for (int i = 0; i < songList.size(); i++) {
+            if (songList.get(i) == w) {
+                // print duplicate message
+                System.out.println("|" + graphArray[v].getKey() + "<SEP>" + graphArray[w].getKey() + "| duplicates a record already in the database."); 
+            }
+            else {
+                songList.add(w);
+                edgeCount++;
+            }
+        }
+
+        for (int i = 0; i < artistList.size(); i++) {
+            if (artistList.get(i) == v) {
+                // print duplicate message
+                System.out.println("|" + graphArray[v].getKey() + "<SEP>" + graphArray[w].getKey() + "| duplicates a record already in the database.");
+            }
+            else {
+                artistList.add(v);
+                edgeCount++;
+            }
+        }
+
+    }
+
+    /**
+     * 
+     * // Removes the edge from the graph.
+     * public void removeEdge(int v, int w) {
+     * Edge curr = find(v, w);
+     * if ((curr.next == null) || curr.next.vertex != w) {
+     * return;
+     * }
+     * else {
+     * curr.next = curr.next.next;
+     * if (curr.next != null) {
+     * curr.next.prev = curr;
+     * }
+     * }
+     * numEdge--;
+     * }
+     * 
+     * 
+     * // Returns true iff the graph has the edge
+     * public boolean hasEdge(int v, int w) {
+     * return weight(v, w) != 0;
+     * }
+     * 
+     * 
+     * // Returns an array containing the indicies of the neighbors of v
+     * public int[] neighbors(int v) {
+     * int cnt = 0;
+     * Edge curr;
+     * for (curr = nodeArray[v].next; curr != null; curr = curr.next) {
+     * cnt++;
+     * }
+     * int[] temp = new int[cnt];
+     * cnt = 0;
+     * for (curr = nodeArray[v].next; curr != null; curr = curr.next) {
+     * temp[cnt++] = curr.vertex;
+     * }
+     * return temp;
+     * }
+     * 
+     **/
+}
