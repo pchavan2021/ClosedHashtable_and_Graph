@@ -1,0 +1,39 @@
+public class GraphNode<E> {
+    private int position;
+    private String key;
+    private SinglyLinkedList<Integer> value;
+   // Key - string artist/song
+    //Value - linked lists of the songs/artsits
+    //index - where it is in the adjacency list
+    
+    public GraphNode(int index) {
+        position = index;
+    }
+    
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String k) {
+        key = k;
+    }
+
+    public SinglyLinkedList<Integer> getValue() {
+        return value;
+    }
+    
+    public void setValue(SinglyLinkedList<Integer> v) {
+        value = v;
+    }
+
+   
+    public int getPos() {
+        return position;
+    }
+    
+    public void setPos(int pos) {
+        position = pos;
+    }
+}
+
