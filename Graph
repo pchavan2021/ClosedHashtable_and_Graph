@@ -4,6 +4,8 @@ public class Graph<E> {
     int graphSize;
     private int edgeCount;
     private int verticeCount;
+    private int parent[];
+    private int counts[];
 
     // No real constructor needed
     public Graph(int n) {
@@ -19,7 +21,6 @@ public class Graph<E> {
     public int verticeCount() {
         return verticeCount;
     }
-
 
     // Return the current number of edges
     public int totalEdgeCount() {
@@ -40,7 +41,35 @@ public class Graph<E> {
     }
 
     public void expandGraph() {
+        int oldSize = graphSize;
+        graphSize = graphSize * 2;
         
+        GraphNode[] oldGraph = graphArray;
+        
+        graphArray = new GraphNode[graphSize];
+        for (int i = 0; i < oldSize; i++) {
+            graphArray[i] = oldGraph[i];
+        }
+        
+    }
+    
+    //while lop
+    
+    // UNION operation without weights
+    //takes two peices that 
+    public void UNION(int a, int b) {
+        int root1 = FIND(a);     // Find root of node a
+        int root2 = FIND(b);     // Find root of node b
+        if (root1 != root2) {    // If they are in different sets, join them
+            parent[root1] = root2; // Make one root point to another (you could choose either)
+        }
+    }
+
+    // FIND operation with path compression
+    public int FIND(int curr) {
+        if (parent[curr] == -1) return curr; // At root
+        parent[curr] = FIND(parent[curr]);   // Path compression
+        return parent[curr];
     }
 
     public void insert(String artistAdd, String songAdd) {
@@ -54,6 +83,10 @@ public class Graph<E> {
             else if (graphArray[i].getKey().equals(songAdd)) {
                 songIndex = i;
             }
+        }
+        
+        if (verticeCount + 1 == graphArray.length) {
+            expandGraph();
         }
 
         /**
@@ -81,6 +114,7 @@ public class Graph<E> {
             verticeCount++;
         }
         else if (artistIndex < 0 && songIndex >= 0) {
+            
             GraphNode addNode = new GraphNode(verticeCount);
             addNode.setKey(artistAdd);
 
@@ -125,7 +159,7 @@ public class Graph<E> {
                 edgeCount++;
             }
         }
-
+        
         for (int i = 0; i < artistList.size(); i++) {
             if (artistList.get(i) == v) {
                 // print duplicate message
@@ -136,7 +170,6 @@ public class Graph<E> {
                 edgeCount++;
             }
         }
-
     }
 
     /**
