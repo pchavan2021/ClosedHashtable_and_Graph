@@ -13,7 +13,43 @@ public class Graph<E> {
         graphSize = n;
         edgeCount = 0;
         verticeCount = 0;
+        //need to account for when graph expands sometime
+        parent = new int[n];
+        
 
+    }
+    
+    private void initializeParentArray() {
+        for (int i = 0; i < graphSize; i++) {
+            parent[i] = i;
+        }
+    }
+    
+    public int computeConnectedComponents() {
+        // Initialize parent array for Union-Find
+        initializeParentArray();
+
+        // Apply UNION operation for every pair of connected vertices
+        for (int i = 0; i < graphArray.length; i++) {
+            if (graphArray[i] != null) {
+                SinglyLinkedList<Integer> neighbors = graphArray[i].getValue();
+                
+                for (int j = 0; j < neighbors.size(); j++) {
+                    UNION(i, neighbors.get(j));
+                }
+                
+            }
+        }
+
+        // Count the number of unique roots
+        int connectedComponents = 0;
+        for (int i = 0; i < graphArray.length; i++) {
+            if (parent[i] == i) {
+                connectedComponents++;
+            }
+        }
+
+        return connectedComponents;
     }
 
 
