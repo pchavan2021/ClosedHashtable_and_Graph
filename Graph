@@ -14,7 +14,7 @@ public class Graph<E> {
         graphSize = n;
         edgeCount = 0;
         verticeCount = 0;
-        distances = new int[graphSize][graphSize];
+
     }
 
 
@@ -125,6 +125,7 @@ public class Graph<E> {
 
 
     public void floydMaywether() {
+        distances = new int[graphSize][graphSize];
         // Initialize distances for Floyd-Warshall
         for (int i = 0; i < graphSize; i++) {
             Arrays.fill(distances[i], Integer.MAX_VALUE);
@@ -255,11 +256,26 @@ public class Graph<E> {
     }
 
 
+    public int getSize() {
+        int count = 0;
+        for (int i = 0; i < graphArray.length; i++) {
+            if (graphArray[i] != null) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+
     public void insert(String artistAdd, String songAdd) {
         int artistIndex = -1;
         int songIndex = -1;
 
-        if (verticeCount + 1 == graphArray.length) {
+        int count = getSize();
+
+        if (count + 4 == graphArray.length) {
+            System.out.println("i am doubling");
             expandGraph();
         }
 
@@ -267,9 +283,16 @@ public class Graph<E> {
             if (graphArray[i] != null) {
                 if (graphArray[i].getKey().equals(artistAdd)) {
                     artistIndex = i;
+                    break;
                 }
-                else if (graphArray[i].getKey().equals(songAdd)) {
+            }
+        }
+
+        for (int i = 0; i < graphArray.length; i++) {
+            if (graphArray[i] != null) {
+                if (graphArray[i].getKey().equals(songAdd)) {
                     songIndex = i;
+                    break;
                 }
             }
         }
@@ -283,51 +306,36 @@ public class Graph<E> {
             addEdge(artistIndex, songIndex);
         }
         else if (artistIndex >= 0 && songIndex < 0) {
-
-            // Find next null spot for song if not found
-            if (songIndex == -1) {
-                for (int i = artistIndex + 1; i < graphArray.length; i++) {
-                    if (graphArray[i] == null) {
-                        songIndex = i;
-                        break; // Stop after finding spot for song
-                    }
+            for (int i = 0; i < graphArray.length; i++) {
+                if (graphArray[i] == null) {
+                    songIndex = i;
+                    GraphNode addSongNode = new GraphNode();
+                    addSongNode.setKey(songAdd);
+                    graphArray[i] = addSongNode;
+                    break; // Stop after finding spot for song
                 }
             }
-            /**
-             * artist node in the graph but the song isn't
-             * create a new vertex for the song
-             * add an edge for the song node and for the artist node
-             * 
-             * vice versa
-             */
-            GraphNode addNode = new GraphNode(verticeCount);
-            addNode.setKey(songAdd);
 
-            graphArray[verticeCount] = addNode;
             addEdge(artistIndex, songIndex);
-
-            verticeCount++;
         }
         else if (artistIndex < 0 && songIndex >= 0) {
-            if (artistIndex == -1) {
-                for (int i = 0; i < graphArray.length; i++) {
-                    if (graphArray[i] == null) {
-                        artistIndex = i;
-                        break; // Stop after finding spot for artist
-                    }
+            // Find next null spot for artist if not found
+            for (int i = 0; i < graphArray.length; i++) {
+                if (graphArray[i] == null) {
+                    artistIndex = i;
+                    GraphNode addArtistNode = new GraphNode();
+                    addArtistNode.setKey(artistAdd);
+                    graphArray[i] = addArtistNode;
+                    break; // Stop after finding spot for artist
                 }
             }
 
-            GraphNode addNode = new GraphNode(verticeCount);
-            addNode.setKey(artistAdd);
-
-            graphArray[verticeCount] = addNode;
-
             addEdge(artistIndex, songIndex);
 
-            verticeCount++;
         }
         else if (artistIndex < 0 && songIndex < 0) {
+            int a = -1000;
+            int b = -1000;
             // neither the artist or song exist in the graph as nodes
             // add the artist and song nodes to the graoh
             // make the edges between them
@@ -336,35 +344,46 @@ public class Graph<E> {
                 for (int i = 0; i < graphArray.length; i++) {
                     if (graphArray[i] == null) {
                         artistIndex = i;
+                        a = i;
+
+                        GraphNode addArtistNode = new GraphNode();
+                        addArtistNode.setKey(artistAdd);
+                        graphArray[i] = addArtistNode;
+
+                        System.out.println(graphArray[i].getKey());
                         break; // Stop after finding spot for artist
                     }
                 }
             }
 
-            GraphNode addArtistNode = new GraphNode(verticeCount);
-            addArtistNode.setKey(artistAdd);
-            graphArray[verticeCount] = addArtistNode;
-            verticeCount++;
-
-            // Find next null spot for song if not found
             if (songIndex == -1) {
-                for (int i = 0; i < graphArray.length; i++) { // Start from the
-                                                              // next index
-                                                              // after
-                                                              // artistIndex
+                for (int i = 0; i < graphArray.length; i++) {
                     if (graphArray[i] == null) {
                         songIndex = i;
+                        b = i;
+
+                        GraphNode addSongNode = new GraphNode();
+                        addSongNode.setKey(songAdd);
+                        graphArray[i] = addSongNode;
+
+                        System.out.println(graphArray[i].getKey());
                         break; // Stop after finding spot for song
                     }
                 }
             }
+            addEdge(a, b);
 
-            GraphNode addSongNode = new GraphNode(verticeCount);
-            addSongNode.setKey(songAdd);
-            graphArray[verticeCount] = addSongNode;
-            verticeCount++;
-            addEdge(artistIndex, songIndex);
+        }
+    }
 
+
+    public void addVertex(GraphNode add) {
+        for (int i = 0; i < graphArray.length; i++) {
+            if (graphArray[i] == null) {
+                graphArray[i] = add;
+
+                break;
+            }
         }
     }
 
@@ -382,7 +401,7 @@ public class Graph<E> {
                     + graphArray[w].getKey()
                     + "| duplicates a record already in the database.");
                 isSongAdded = true;
-                break;
+                return;
             }
         }
         if (!isSongAdded) {
@@ -398,7 +417,7 @@ public class Graph<E> {
                     + graphArray[w].getKey()
                     + "| duplicates a record already in the database.");
                 isArtistAdded = true;
-                break;
+                return;
             }
         }
         if (!isArtistAdded) {
@@ -412,10 +431,13 @@ public class Graph<E> {
         int index = -1;
         for (int i = 0; i < graphArray.length; i++) {
             if (graphArray[i] != null) {
-                if (graphArray[i].getKey().equals(rem)) {
-                    index = i;
-                    graphArray[i] = new GraphNode(i);
-                    removeEdge(index);
+                if (graphArray[i].getKey() != null) {
+                    if (graphArray[i].getKey().equals(rem)) {
+                        index = i;
+                        graphArray[i] = new GraphNode();
+                        removeEdge(index);
+                        verticeCount--;
+                    }
                 }
             }
         }
@@ -429,6 +451,7 @@ public class Graph<E> {
                 for (int j = 0; j < temp.size(); j++) {
                     if (temp.get(j) == rem) {
                         temp.remove(j);
+                        edgeCount--;
                     }
                 }
             }
