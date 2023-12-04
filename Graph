@@ -1,11 +1,12 @@
+import java.util.Arrays;
+
 public class Graph<E> {
 
     private GraphNode[] graphArray;
     int graphSize;
     private int edgeCount;
     private int verticeCount;
-    private int parent[];
-    private int counts[];
+    int[][] distances;
 
     // No real constructor needed
     public Graph(int n) {
@@ -13,43 +14,205 @@ public class Graph<E> {
         graphSize = n;
         edgeCount = 0;
         verticeCount = 0;
-        //need to account for when graph expands sometime
-        parent = new int[n];
-        
+        distances = new int[graphSize][graphSize];
+    }
+
+
+    public int computeConnectedComponents(int[] parent) {
+        Arrays.sort(parent);
+        int uniqueCount = 0; // Start with 1 as there's at least one unique
+                             // number
+        for (int i = 1; i < parent.length; i++) {
+            if (parent[i] != parent[i - 1]) {
+                uniqueCount++; // Increment count for each new unique number
+            }
+        }
+
+        return uniqueCount;
+    }
+
+
+    public int computeLargestConnectedComponent(int[] parent) {
+        int largest = 0;/**
+                         * for (int i = 0; i < parent.length; i++) {
+                         * if (parent[i] != -1) {
+                         * if (graphArray[i].getValue().size() > largest) {
+                         * largest = graphArray[i].getValue().size();
+                         * }
+                         * }
+                         * }
+                         **/
+        return largest;
+    }
+
+
+    public void print() {
+
+        int[] parent = compute();
+
+        /*
+         * for (int y = 0; y < graphArray.length; y++) {
+         * if (graphArray[y] != null) { // Check if the GraphNode is not null
+         * System.out.println("Node at index " + y + ": "
+         * + graphArray[y].getKey());
+         * SinglyLinkedList<Integer> nodeValue = graphArray[y]
+         * .getValue();
+         * if (nodeValue != null) {
+         * System.out.println("  Connections: " + nodeValue
+         * .toString());
+         * }
+         * else {
+         * System.out.println("  No connections.");
+         * }
+         * }
+         * else {
+         * System.out.println("Node at index " + y
+         * + " is null.");
+         * }
+         * }
+         */
+
+        System.out.println("There are " + computeConnectedComponents(parent)
+            + " connected components");
+
+        int max = 0;
+        int maxComponentSize = 0;
+        for (int d = 0; d < parent.length; d++) {
+            if (parent[d] >= 0) {
+                if (graphArray[parent[d]].getValue().size() > max) {
+
+                    int[] componentSizes = new int[graphSize];
+
+                    for (int i = 0; i < parent.length; i++) {
+                        if (parent[i] >= 0) {
+                            int root = FIND(i, parent);
+                            componentSizes[root]++;
+                        }
+                    }
+
+                    maxComponentSize = 0;
+                    for (int size : componentSizes) {
+                        if (size > maxComponentSize) {
+                            maxComponentSize = size;
+                        }
+                    }
+
+                }
+
+            }
+        }
+        if (maxComponentSize != 0) {
+            maxComponentSize++;
+        }
+        System.out.println("The largest connected component has "
+            + (maxComponentSize) + " elements");
+
+        floydMaywether(); // Update distances matrix
+
+        int diameter = 0;
+        for (int i = 0; i < graphSize; i++) {
+            for (int j = 0; j < graphSize; j++) {
+                if (distances[i][j] != Integer.MAX_VALUE) {
+                    diameter = Math.max(diameter, distances[i][j]);
+                }
+            }
+        }
+
+        System.out.println("The diameter of the largest component is "
+            + diameter);
 
     }
-    
-    private void initializeParentArray() {
+
+
+    public void floydMaywether() {
+        // Initialize distances for Floyd-Warshall
         for (int i = 0; i < graphSize; i++) {
-            parent[i] = i;
+            Arrays.fill(distances[i], Integer.MAX_VALUE);
+            distances[i][i] = 0;
+        }
+
+        for (int i = 0; i < graphSize; i++) {
+            if (graphArray[i] != null) {
+                SinglyLinkedList<Integer> connections = graphArray[i]
+                    .getValue();
+                for (int index = 0; index < connections.size(); index++) {
+                    int connection = connections.get(index);
+                    distances[i][connection] = 1; // edge has weight 1
+                }
+            }
+        }
+
+        // Floyd-Warshall algorithm
+        for (int k = 0; k < graphSize; k++) {
+            for (int i = 0; i < graphSize; i++) {
+                for (int j = 0; j < graphSize; j++) {
+                    if (distances[i][k] < Integer.MAX_VALUE
+                        && distances[k][j] < Integer.MAX_VALUE) {
+                        distances[i][j] = Math.min(distances[i][j],
+                            distances[i][k] + distances[k][j]);
+                    }
+                }
+            }
         }
     }
-    
-    public int computeConnectedComponents() {
-        // Initialize parent array for Union-Find
-        initializeParentArray();
 
-        // Apply UNION operation for every pair of connected vertices
+
+    public int[] compute() {
+        int parent[] = new int[graphSize];
+        int weights[] = new int[graphSize];
+
+        for (int i = 0; i < parent.length; i++) {
+            parent[i] = -1;
+        }
+
+        for (int i = 0; i < weights.length; i++) {
+            weights[i] = 1;
+        }
+
+        // Apply UNION
         for (int i = 0; i < graphArray.length; i++) {
             if (graphArray[i] != null) {
                 SinglyLinkedList<Integer> neighbors = graphArray[i].getValue();
-                
+
                 for (int j = 0; j < neighbors.size(); j++) {
-                    UNION(i, neighbors.get(j));
+
+                    if (FIND(i, parent) != FIND(neighbors.get(j), parent)) {
+                        // System.out.println(sameComponent(i,
+                        // neighbors.get(j)));
+                        UNION(i, neighbors.get(j), parent, weights);
+                    }
                 }
-                
             }
         }
 
-        // Count the number of unique roots
-        int connectedComponents = 0;
-        for (int i = 0; i < graphArray.length; i++) {
-            if (parent[i] == i) {
-                connectedComponents++;
+        return parent;
+
+    }
+
+
+    // Merge two subtrees if they are different
+    public void UNION(int a, int b, int[] parent, int[] weights) {
+        int root1 = FIND(a, parent); // Find root of node a
+        int root2 = FIND(b, parent); // Find root of node b
+        if (root1 != root2) { // Merge with weighted union
+            if (weights[root2] > weights[root1]) {
+                parent[root1] = root2;
+                weights[root2] += weights[root1];
+            }
+            else {
+                parent[root2] = root1;
+                weights[root1] += weights[root2];
             }
         }
+    }
 
-        return connectedComponents;
+
+    // Return the root of curr's tree
+    public int FIND(int curr, int[] parent) {
+        while (parent[curr] != -1) {
+            curr = parent[curr];
+        }
+        return curr; // Now at root
     }
 
 
@@ -57,6 +220,7 @@ public class Graph<E> {
     public int verticeCount() {
         return verticeCount;
     }
+
 
     // Return the current number of edges
     public int totalEdgeCount() {
@@ -76,53 +240,38 @@ public class Graph<E> {
         graphArray[v].setValue(val);
     }
 
+
     public void expandGraph() {
         int oldSize = graphSize;
         graphSize = graphSize * 2;
-        
+
         GraphNode[] oldGraph = graphArray;
-        
+
         graphArray = new GraphNode[graphSize];
         for (int i = 0; i < oldSize; i++) {
             graphArray[i] = oldGraph[i];
         }
-        
-    }
-    
-    //while lop
-    
-    // UNION operation without weights
-    //takes two peices that 
-    public void UNION(int a, int b) {
-        int root1 = FIND(a);     // Find root of node a
-        int root2 = FIND(b);     // Find root of node b
-        if (root1 != root2) {    // If they are in different sets, join them
-            parent[root1] = root2; // Make one root point to another (you could choose either)
-        }
+
     }
 
-    // FIND operation with path compression
-    public int FIND(int curr) {
-        if (parent[curr] == -1) return curr; // At root
-        parent[curr] = FIND(parent[curr]);   // Path compression
-        return parent[curr];
-    }
 
     public void insert(String artistAdd, String songAdd) {
-        int artistIndex = -10;
-        int songIndex = -10;
+        int artistIndex = -1;
+        int songIndex = -1;
 
-        for (int i = 0; i < graphArray.length; i++) {
-            if (graphArray[i].getKey().equals(artistAdd)) {
-                artistIndex = i;
-            }
-            else if (graphArray[i].getKey().equals(songAdd)) {
-                songIndex = i;
-            }
-        }
-        
         if (verticeCount + 1 == graphArray.length) {
             expandGraph();
+        }
+
+        for (int i = 0; i < graphArray.length; i++) {
+            if (graphArray[i] != null) {
+                if (graphArray[i].getKey().equals(artistAdd)) {
+                    artistIndex = i;
+                }
+                else if (graphArray[i].getKey().equals(songAdd)) {
+                    songIndex = i;
+                }
+            }
         }
 
         /**
@@ -130,9 +279,20 @@ public class Graph<E> {
          * add an edge between the two
          */
         if (artistIndex >= 0 && songIndex >= 0) {
+
             addEdge(artistIndex, songIndex);
         }
         else if (artistIndex >= 0 && songIndex < 0) {
+
+            // Find next null spot for song if not found
+            if (songIndex == -1) {
+                for (int i = artistIndex + 1; i < graphArray.length; i++) {
+                    if (graphArray[i] == null) {
+                        songIndex = i;
+                        break; // Stop after finding spot for song
+                    }
+                }
+            }
             /**
              * artist node in the graph but the song isn't
              * create a new vertex for the song
@@ -140,7 +300,6 @@ public class Graph<E> {
              * 
              * vice versa
              */
-
             GraphNode addNode = new GraphNode(verticeCount);
             addNode.setKey(songAdd);
 
@@ -150,7 +309,15 @@ public class Graph<E> {
             verticeCount++;
         }
         else if (artistIndex < 0 && songIndex >= 0) {
-            
+            if (artistIndex == -1) {
+                for (int i = 0; i < graphArray.length; i++) {
+                    if (graphArray[i] == null) {
+                        artistIndex = i;
+                        break; // Stop after finding spot for artist
+                    }
+                }
+            }
+
             GraphNode addNode = new GraphNode(verticeCount);
             addNode.setKey(artistAdd);
 
@@ -164,16 +331,38 @@ public class Graph<E> {
             // neither the artist or song exist in the graph as nodes
             // add the artist and song nodes to the graoh
             // make the edges between them
+
+            if (artistIndex == -1) {
+                for (int i = 0; i < graphArray.length; i++) {
+                    if (graphArray[i] == null) {
+                        artistIndex = i;
+                        break; // Stop after finding spot for artist
+                    }
+                }
+            }
+
             GraphNode addArtistNode = new GraphNode(verticeCount);
             addArtistNode.setKey(artistAdd);
             graphArray[verticeCount] = addArtistNode;
             verticeCount++;
 
+            // Find next null spot for song if not found
+            if (songIndex == -1) {
+                for (int i = 0; i < graphArray.length; i++) { // Start from the
+                                                              // next index
+                                                              // after
+                                                              // artistIndex
+                    if (graphArray[i] == null) {
+                        songIndex = i;
+                        break; // Stop after finding spot for song
+                    }
+                }
+            }
+
             GraphNode addSongNode = new GraphNode(verticeCount);
             addSongNode.setKey(songAdd);
             graphArray[verticeCount] = addSongNode;
             verticeCount++;
-
             addEdge(artistIndex, songIndex);
 
         }
@@ -185,25 +374,63 @@ public class Graph<E> {
         SinglyLinkedList<Integer> songList = graphArray[v].getValue();
         SinglyLinkedList<Integer> artistList = graphArray[w].getValue();
 
+        boolean isSongAdded = false;
         for (int i = 0; i < songList.size(); i++) {
-            if (songList.get(i) == w) {
-                // print duplicate message
-                System.out.println("|" + graphArray[v].getKey() + "<SEP>" + graphArray[w].getKey() + "| duplicates a record already in the database."); 
-            }
-            else {
-                songList.add(w);
-                edgeCount++;
+            if (songList.get(i) != null && songList.get(i) == w) {
+                // Duplicate found, do not add
+                System.out.println("|" + graphArray[v].getKey() + "<SEP>"
+                    + graphArray[w].getKey()
+                    + "| duplicates a record already in the database.");
+                isSongAdded = true;
+                break;
             }
         }
-        
+        if (!isSongAdded) {
+            songList.add(w); // Add only if not already present
+            edgeCount++;
+        }
+
+        boolean isArtistAdded = false;
         for (int i = 0; i < artistList.size(); i++) {
-            if (artistList.get(i) == v) {
-                // print duplicate message
-                System.out.println("|" + graphArray[v].getKey() + "<SEP>" + graphArray[w].getKey() + "| duplicates a record already in the database.");
+            if (artistList.get(i) != null && artistList.get(i) == v) {
+                // Duplicate found, do not add
+                System.out.println("|" + graphArray[v].getKey() + "<SEP>"
+                    + graphArray[w].getKey()
+                    + "| duplicates a record already in the database.");
+                isArtistAdded = true;
+                break;
             }
-            else {
-                artistList.add(v);
-                edgeCount++;
+        }
+        if (!isArtistAdded) {
+            artistList.add(v); // Add only if not already present
+            edgeCount++;
+        }
+    }
+
+
+    public void remove(String rem) {
+        int index = -1;
+        for (int i = 0; i < graphArray.length; i++) {
+            if (graphArray[i] != null) {
+                if (graphArray[i].getKey().equals(rem)) {
+                    index = i;
+                    graphArray[i] = new GraphNode(i);
+                    removeEdge(index);
+                }
+            }
+        }
+    }
+
+
+    public void removeEdge(int rem) {
+        for (int i = 0; i < graphArray.length; i++) {
+            if (graphArray[i] != null) {
+                SinglyLinkedList<Integer> temp = graphArray[i].getValue();
+                for (int j = 0; j < temp.size(); j++) {
+                    if (temp.get(j) == rem) {
+                        temp.remove(j);
+                    }
+                }
             }
         }
     }
