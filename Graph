@@ -32,45 +32,27 @@ public class Graph<E> {
     }
 
 
-    public int computeLargestConnectedComponent(int[] parent) {
-        int largest = 0;/**
-                         * for (int i = 0; i < parent.length; i++) {
-                         * if (parent[i] != -1) {
-                         * if (graphArray[i].getValue().size() > largest) {
-                         * largest = graphArray[i].getValue().size();
-                         * }
-                         * }
-                         * }
-                         **/
-        return largest;
-    }
-
-
     public void print() {
 
         int[] parent = compute();
 
-        /*
-         * for (int y = 0; y < graphArray.length; y++) {
-         * if (graphArray[y] != null) { // Check if the GraphNode is not null
-         * System.out.println("Node at index " + y + ": "
-         * + graphArray[y].getKey());
-         * SinglyLinkedList<Integer> nodeValue = graphArray[y]
-         * .getValue();
-         * if (nodeValue != null) {
-         * System.out.println("  Connections: " + nodeValue
-         * .toString());
-         * }
-         * else {
-         * System.out.println("  No connections.");
-         * }
-         * }
-         * else {
-         * System.out.println("Node at index " + y
-         * + " is null.");
-         * }
-         * }
-         */
+        for (int y = 0; y < graphArray.length; y++) {
+            if (graphArray[y] != null) { // Check if the GraphNode is not null
+                System.out.println("Node at index " + y + ": " + graphArray[y]
+                    .getKey());
+                SinglyLinkedList<Integer> nodeValue = graphArray[y].getValue();
+                if (nodeValue != null) {
+                    System.out.println("  Connections: " + nodeValue
+                        .toString());
+                }
+                else {
+                    System.out.println("  No connections.");
+                }
+            }
+            else {
+                System.out.println("Node at index " + y + " is null.");
+            }
+        }
 
         System.out.println("There are " + computeConnectedComponents(parent)
             + " connected components");
@@ -82,11 +64,16 @@ public class Graph<E> {
                 if (graphArray[parent[d]].getValue().size() > max) {
 
                     int[] componentSizes = new int[graphSize];
-
+                    int large = -1;
                     for (int i = 0; i < parent.length; i++) {
                         if (parent[i] >= 0) {
                             int root = FIND(i, parent);
                             componentSizes[root]++;
+                            // do this here
+                            if (componentSizes[root] > maxComponentSize) {
+                                maxComponentSize = componentSizes[root];
+                                large = root;
+                            }
                         }
                     }
 
@@ -107,11 +94,11 @@ public class Graph<E> {
         System.out.println("The largest connected component has "
             + (maxComponentSize) + " elements");
 
-        floydMaywether(); // Update distances matrix
+        int test = floydMaywether(); // Update distances matrix
 
         int diameter = 0;
-        for (int i = 0; i < graphSize; i++) {
-            for (int j = 0; j < graphSize; j++) {
+        for (int i = 0; i < test; i++) {
+            for (int j = 0; j < test; j++) {
                 if (distances[i][j] != Integer.MAX_VALUE) {
                     diameter = Math.max(diameter, distances[i][j]);
                 }
@@ -124,29 +111,34 @@ public class Graph<E> {
     }
 
 
-    public void floydMaywether() {
-        distances = new int[graphSize][graphSize];
-        // Initialize distances for Floyd-Warshall
-        for (int i = 0; i < graphSize; i++) {
+    public int floydMaywether() {
+        int[] largestComponentNodes = getLargestComponentNodes();
+        int componentSize = largestComponentNodes.length;
+        distances = new int[componentSize][componentSize];
+
+        // Initialize distances
+        for (int i = 0; i < componentSize; i++) {
             Arrays.fill(distances[i], Integer.MAX_VALUE);
             distances[i][i] = 0;
-        }
-
-        for (int i = 0; i < graphSize; i++) {
-            if (graphArray[i] != null) {
-                SinglyLinkedList<Integer> connections = graphArray[i]
-                    .getValue();
-                for (int index = 0; index < connections.size(); index++) {
-                    int connection = connections.get(index);
-                    distances[i][connection] = 1; // edge has weight 1
+            int nodeIdx = largestComponentNodes[i];
+            SinglyLinkedList<Integer> connections = graphArray[nodeIdx]
+                .getValue();
+            for (int j = 0; j < connections.size(); j++) {
+                int connection = connections.get(j);
+                for (int k = 0; k < largestComponentNodes.length; k++) {
+                    if (largestComponentNodes[k] == connection) {
+                        distances[i][k] = 1; // edge has weight 1
+                        break;
+                    }
                 }
             }
+
         }
 
-        // Floyd-Warshall algorithm
-        for (int k = 0; k < graphSize; k++) {
-            for (int i = 0; i < graphSize; i++) {
-                for (int j = 0; j < graphSize; j++) {
+        // Apply Floyd-Warshall algorithm
+        for (int k = 0; k < componentSize; k++) {
+            for (int i = 0; i < componentSize; i++) {
+                for (int j = 0; j < componentSize; j++) {
                     if (distances[i][k] < Integer.MAX_VALUE
                         && distances[k][j] < Integer.MAX_VALUE) {
                         distances[i][j] = Math.min(distances[i][j],
@@ -155,6 +147,7 @@ public class Graph<E> {
                 }
             }
         }
+        return largestComponentNodes.length;
     }
 
 
@@ -274,11 +267,11 @@ public class Graph<E> {
 
         int count = getSize();
 
-        if (count + 4 == graphArray.length) {
-            System.out.println("i am doubling");
+        if (count >= graphSize * 0.75) {
+
             expandGraph();
         }
-
+        // MAYBE ERRORING ON THIS
         for (int i = 0; i < graphArray.length; i++) {
             if (graphArray[i] != null) {
                 if (graphArray[i].getKey().equals(artistAdd)) {
@@ -346,13 +339,12 @@ public class Graph<E> {
                         artistIndex = i;
                         a = i;
 
-                        GraphNode addArtistNode = new GraphNode();
+                        GraphNode<E> addArtistNode = new GraphNode<E>();
                         addArtistNode.setKey(artistAdd);
                         graphArray[i] = addArtistNode;
-
-                        System.out.println(graphArray[i].getKey());
                         break; // Stop after finding spot for artist
                     }
+
                 }
             }
 
@@ -365,8 +357,6 @@ public class Graph<E> {
                         GraphNode addSongNode = new GraphNode();
                         addSongNode.setKey(songAdd);
                         graphArray[i] = addSongNode;
-
-                        System.out.println(graphArray[i].getKey());
                         break; // Stop after finding spot for song
                     }
                 }
@@ -431,14 +421,13 @@ public class Graph<E> {
         int index = -1;
         for (int i = 0; i < graphArray.length; i++) {
             if (graphArray[i] != null) {
-                if (graphArray[i].getKey() != null) {
-                    if (graphArray[i].getKey().equals(rem)) {
-                        index = i;
-                        graphArray[i] = new GraphNode();
-                        removeEdge(index);
-                        verticeCount--;
-                    }
+
+                if (graphArray[i].getKey().equals(rem)) {
+                    index = i;
+                    graphArray[i] = null;
+                    removeEdge(index);
                 }
+
             }
         }
     }
@@ -451,51 +440,41 @@ public class Graph<E> {
                 for (int j = 0; j < temp.size(); j++) {
                     if (temp.get(j) == rem) {
                         temp.remove(j);
-                        edgeCount--;
                     }
                 }
             }
         }
     }
 
-    /**
-     * 
-     * // Removes the edge from the graph.
-     * public void removeEdge(int v, int w) {
-     * Edge curr = find(v, w);
-     * if ((curr.next == null) || curr.next.vertex != w) {
-     * return;
-     * }
-     * else {
-     * curr.next = curr.next.next;
-     * if (curr.next != null) {
-     * curr.next.prev = curr;
-     * }
-     * }
-     * numEdge--;
-     * }
-     * 
-     * 
-     * // Returns true iff the graph has the edge
-     * public boolean hasEdge(int v, int w) {
-     * return weight(v, w) != 0;
-     * }
-     * 
-     * 
-     * // Returns an array containing the indicies of the neighbors of v
-     * public int[] neighbors(int v) {
-     * int cnt = 0;
-     * Edge curr;
-     * for (curr = nodeArray[v].next; curr != null; curr = curr.next) {
-     * cnt++;
-     * }
-     * int[] temp = new int[cnt];
-     * cnt = 0;
-     * for (curr = nodeArray[v].next; curr != null; curr = curr.next) {
-     * temp[cnt++] = curr.vertex;
-     * }
-     * return temp;
-     * }
-     * 
-     **/
+
+    public int[] getLargestComponentNodes() {
+        int[] parent = compute();
+        int[] componentSizes = new int[graphSize];
+        int largestComponentRoot = -1;
+        int maxComponentSize = 0;
+
+        // Find root of each node and count the size of each component
+        for (int i = 0; i < graphSize; i++) {
+            if (graphArray[i] != null) {
+                int root = FIND(i, parent);
+                componentSizes[root]++;
+                if (componentSizes[root] > maxComponentSize) {
+                    maxComponentSize = componentSizes[root];
+                    largestComponentRoot = root;
+                }
+            }
+        }
+
+        // Collect nodes in the largest component
+        int[] largestComponentNodes = new int[maxComponentSize];
+        int index = 0;
+        for (int i = 0; i < graphSize; i++) {
+            if (FIND(i, parent) == largestComponentRoot) {
+                largestComponentNodes[index++] = i;
+            }
+        }
+
+        return largestComponentNodes;
+    }
+
 }
