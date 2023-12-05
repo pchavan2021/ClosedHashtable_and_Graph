@@ -53,8 +53,8 @@ public class HashTable<K, V> {
 
         for (int i = 0; i < oldSize; i++) {
             if (oldTable[i] != null && !oldTable[i].isDeleted()) {
-                K key = oldTable[i].key;
-                V value = oldTable[i].value;
+                K key = oldTable[i].getKey();
+                V value = oldTable[i].getValue();
 
                 int hash = Hash.h((String)key, hashSize);
                 int j = 0;
@@ -120,7 +120,7 @@ public class HashTable<K, V> {
                 }
                 return true;
             }
-            else if (entry.key.equals(key) && !entry.isDeleted()) {
+            else if (entry.getKey().equals(key) && !entry.isDeleted()) {
                
                 if (song) {
                     System.out.println("im here");
@@ -165,7 +165,7 @@ public class HashTable<K, V> {
             }
 
             // Check if the current entry matches the key and is not marked as deleted
-            if (!entry.isDeleted() && entry.key.equals(key)) {
+            if (!entry.isDeleted() && entry.getKey().equals(key)) {
                 entry.setTomb(true); // Mark as deleted
                 size--; // Decrement the size
 
@@ -205,61 +205,13 @@ public class HashTable<K, V> {
 
             if (entry == null) {
                 return -1; // Key not found
-            } else if (!entry.isDeleted() && entry.key.equals(key)) {
+            } else if (!entry.isDeleted() && entry.getKey().equals(key)) {
                 return probe; // Key found
             }
             i++;
         }
         return -1; // Key not found after full probing
     }
-
-
-
-
-    /**
-     * searches for the seminar by it's key
-     * 
-     * @param key
-     *            this is the key you're searching for
-     */
-    /**
-     * public boolean search(int key) {
-     * 
-     * int index = findIndex(key);
-     * 
-     * if (index == -1 || table[index].tomb) {
-     * System.out.println("Search FAILED -- There is no re"
-     * + "co" + "rd with ID " + key);
-     * return false;
-     * 
-     * }
-     * else if (table[index].key == key && table[index] != null) {
-     * if (table[index].value != null) {
-     * System.out.println("Found record with ID "
-     * + table[index].key + ":");
-     * System.out.println(table[index].value.toString());
-     * }
-     * else {
-     * System.out.println("Search FAILED --" + " There"
-     * + " is no record with ID " + key);
-     * return true;
-     * 
-     * }
-     * 
-     * }
-     * return true;
-     * }
-     **/
-
-    /**
-     * Returns the seminar by it's key
-     * 
-     * @param key
-     *            this the key you're looking for
-     * @return the Seminar associate with the key
-     */
-
- 
 
     /**
      * 
@@ -271,11 +223,11 @@ public class HashTable<K, V> {
 
         for (int x = 0; x < hashSize; x++) {
             if (table[x] != null) {
-                if (table[x].tomb) {
+                if (table[x].isDeleted()) {
                     System.out.println("" + x + ": TOMBSTONE");
                 }
                 else {
-                    System.out.println("" + x + ": |" + table[x].key
+                    System.out.println("" + x + ": |" + table[x].getKey()
                         + "|");
                 }
             }
