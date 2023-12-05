@@ -1,84 +1,34 @@
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Scanner;
-import org.junit.Test;
+import student.TestCase;
 
-public class HashTableTest extends student.TestCase {
-    private final PrintStream originalOut = System.out;
-    private final ByteArrayOutputStream outputStreamCaptor =
-        new ByteArrayOutputStream();
-
-    private HashTable table;
-
+/**
+ * /**
+ * @author Pallavi Chavan pallucha21 and evanhowe03
+ * @version 1.0
+ */
+public class HashTest extends TestCase {
+    /**
+     * Sets up the tests that follow. In general, used for initialization
+     */
     public void setUp() {
-        System.setOut(new PrintStream(outputStreamCaptor));
-
-        table = new HashTable(10, true);
-    }
-
-
-    public void testHash() throws NumberFormatException, Exception {
-        GraphProject graph = new GraphProject();
-        String[] args = new String[2];
-        args[0] = "10";
-        args[1] = "P4sampleInput.txt";
-        GraphProject.main(args);
-
-        String printedText = outputStreamCaptor.toString();
-
-        assertFuzzyEquals(
-            "when summers through does not exist in the song database\r\n"
-                + "total songs 0\r\n" + "total artists 0\r\n"
-                + "blind lemon jefferson is added to the artist database\r\n"
-                + "long lonesome blues is added to the song database\r\n"
-                + "blind lemon jeffersonseplong lonesome blues duplicates a record already in the song database\r\n"
-                + "long lonesome blues is added to the song database\r\n"
-                + "long lonesome blues is added to the song database\r\n"
-                + "ma rainey is added to the artist database\r\n"
-                + "ma raineys black bottom is added to the song database\r\n"
-                + "mississippi boweavil blues is added to the song database\r\n"
-                + "song hash table size doubled\r\n"
-                + "fixin to die blues is added to the song database\r\n"
-                + "0 blind lemon jefferson\r\n" + "7 ma rainey\r\n"
-                + "total artists 2\r\n" + "1 fixin to die blues\r\n"
-                + "2 mississippi boweavil blues\r\n"
-                + "7 long lonesome blues\r\n"
-                + "15 long lonesome blues\r\n"
-                + "16 ma raineys black bottom\r\n"
-                + "19 long lonesome blues\r\n" + "total songs 6\r\n"
-                + "sleepy does not exist in the song database\r\n"
-                + "ma rainey does not exist in the artist database\r\n"
-                + "ma rainey is removed from the artist databse\r\n"
-                + "0 blind lemon jefferson\r\n" + "7 tombstone\r\n"
-                + "total artists 1", printedText);
+        // Nothing Here
     }
 
 
     /**
-     * tests the entire hashtable
-     * 
-     * @param name
-     *            aha
-     * @return this returns
+     * Check out the sfold method
+     *
+     * @throws Exception
+     *             either a IOException or FileNotFoundException
      */
-    public String readFile(String name) {
-        String fileFish = "";
-        try {
-
-            Scanner scan = new Scanner(new File(name));
-
-            while (scan.hasNextLine()) {
-                fileFish += scan.nextLine() + "\n";
-            }
-            scan.close();
-        }
-        catch (FileNotFoundException e) {
-
-            e.printStackTrace();
-        }
-
-        return fileFish;
+    public void testSfold() throws Exception {
+        assertTrue(Hash.h("a", 10000) == 97);
+        assertTrue(Hash.h("b", 10000) == 98);
+        assertTrue(Hash.h("aaaa", 10000) == 1873);
+        assertTrue(Hash.h("aaab", 10000) == 9089);
+        assertTrue(Hash.h("baaa", 10000) == 1874);
+        assertTrue(Hash.h("aaaaaaa", 10000) == 3794);
+        assertTrue(Hash.h("Long Lonesome Blues", 10000) == 4635);
+        assertTrue(Hash.h("Long   Lonesome Blues", 10000) == 4159);
+        assertTrue(Hash.h("long Lonesome Blues", 10000) == 4667);
     }
 }
