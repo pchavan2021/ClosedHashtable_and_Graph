@@ -13,6 +13,7 @@ import java.util.Scanner;
 public class CommandProcessor {
     private HashTable song;
     private HashTable artist;
+    private Graph thisGraph;
 
     /**
      * this is where everthing is processed
@@ -28,6 +29,7 @@ public class CommandProcessor {
 
         song = new HashTable(size, true);
         artist = new HashTable(size, false);
+        thisGraph = new Graph(size);
         try {
 
             Scanner scanner = new Scanner(new File(file));
@@ -86,6 +88,7 @@ public class CommandProcessor {
         String art = parts[0].trim();
         String son = parts[1].trim();
 
+        thisGraph.insert(art, son);
         artist.insert(art, son, true);
         if (song.findIndex(son) == -1) { // Only insert if the song is not found
             song.insert(son, art, true);
@@ -105,10 +108,12 @@ public class CommandProcessor {
             case "song":
                 String son = scanner.nextLine().trim();
                 song.delete(son);
+                thisGraph.remove(son);
                 break;
             case "artist":
                 String art = scanner.nextLine().trim();
                 artist.delete(art);
+                thisGraph.remove(art);
                 break;
             default:
                 System.out.println("Uh oh you messed up somewhere");
@@ -125,7 +130,7 @@ public class CommandProcessor {
     public void print(Scanner scanner) {
         String printType = scanner.next(); // Read the print type (song, artist,
                                            // or graph)
-
+        
         switch (printType.toLowerCase()) {
             case "song":
                 int total = song.print();
@@ -136,7 +141,7 @@ public class CommandProcessor {
                 System.out.println("total artists: " + total2);
                 break;
             case "graph":
-
+                thisGraph.print();
                 break;
             default:
                 System.out.println("UH OH WRONG PRINT");
