@@ -1,23 +1,29 @@
 import java.util.Arrays;
-
+/**
+ * @author Pallavi Chavan pallucha21 and evanhowe03
+ * @version 1.0
+ */
 public class Graph<E> {
 
-    private GraphNode[] graphArray;
+    private GraphNode<E>[] graphArray;
     int graphSize;
-    private int edgeCount;
-    private int verticeCount;
     int[][] distances;
 
-    // No real constructor needed
+    /**
+     * graph constructor
+     * @param n intial size of graph
+     */
     public Graph(int n) {
         graphArray = new GraphNode[n];
         graphSize = n;
-        edgeCount = 0;
-        verticeCount = 0;
 
     }
 
-
+    /**
+     * compute # of connected components
+     * @param parent
+     * @return the count
+     */
     public int computeConnectedComponents(int[] parent) {
         Arrays.sort(parent);
         int uniqueCount = 0; // Start with 1 as there's at least one unique
@@ -31,7 +37,9 @@ public class Graph<E> {
         return uniqueCount;
     }
 
-
+    /**
+     * print method
+     */
     public void print() {
 
         int[] parent = compute();
@@ -110,7 +118,12 @@ public class Graph<E> {
 
     }
 
-
+    /**
+     * compute diameter with
+     *  floyd's algorithm
+     * @return the diameter of largest
+     * connected node
+     */
     public int floydMaywether() {
         int[] largestComponentNodes = getLargestComponentNodes();
         int componentSize = largestComponentNodes.length;
@@ -150,7 +163,11 @@ public class Graph<E> {
         return largestComponentNodes.length;
     }
 
-
+    /**
+     * use the union/find algorithm to create
+     * the parent array
+     * @return the parent array
+     */
     public int[] compute() {
         int parent[] = new int[graphSize];
         int weights[] = new int[graphSize];
@@ -184,7 +201,13 @@ public class Graph<E> {
     }
 
 
-    // Merge two subtrees if they are different
+    /**
+     * merge two subtrees if theyre different
+     * @param a index of root of first node
+     * @param b index of root of 2nd node
+     * @param parent parent array
+     * @param weights weights array
+     */
     public void UNION(int a, int b, int[] parent, int[] weights) {
         int root1 = FIND(a, parent); // Find root of node a
         int root2 = FIND(b, parent); // Find root of node b
@@ -201,45 +224,27 @@ public class Graph<E> {
     }
 
 
-    // Return the root of curr's tree
+    /**
+     * Return the root of curr's tree
+     * @param curr current node
+     * @param parent parent array
+     * @return index of root node
+     */
     public int FIND(int curr, int[] parent) {
         while (parent[curr] != -1) {
             curr = parent[curr];
         }
         return curr; // Now at root
     }
-
-
-    // Return the number of vertices
-    public int verticeCount() {
-        return verticeCount;
-    }
-
-
-    // Return the current number of edges
-    public int totalEdgeCount() {
-
-        return edgeCount;
-    }
-
-
-    // Get the value of node with index v
-    public SinglyLinkedList getValue(int v) {
-        return (SinglyLinkedList)graphArray[v].getValue();
-    }
-
-
-    // Set the value of node with index v
-    public void setValue(int v, SinglyLinkedList val) {
-        graphArray[v].setValue(val);
-    }
-
-
+    
+    /**
+     * expand the graph
+     */
     public void expandGraph() {
         int oldSize = graphSize;
         graphSize = graphSize * 2;
 
-        GraphNode[] oldGraph = graphArray;
+        GraphNode<E>[] oldGraph = graphArray;
 
         graphArray = new GraphNode[graphSize];
         for (int i = 0; i < oldSize; i++) {
@@ -248,7 +253,10 @@ public class Graph<E> {
 
     }
 
-
+    /**
+     * find the size of the graph
+     * @return the size
+     */
     public int getSize() {
         int count = 0;
         for (int i = 0; i < graphArray.length; i++) {
@@ -260,7 +268,11 @@ public class Graph<E> {
         return count;
     }
 
-
+    /**
+     * insert song and artist
+     * @param artistAdd string
+     * @param songAdd string
+     */
     public void insert(String artistAdd, String songAdd) {
         int artistIndex = -1;
         int songIndex = -1;
@@ -302,7 +314,7 @@ public class Graph<E> {
             for (int i = 0; i < graphArray.length; i++) {
                 if (graphArray[i] == null) {
                     songIndex = i;
-                    GraphNode addSongNode = new GraphNode();
+                    GraphNode<E> addSongNode = new GraphNode<E>();
                     addSongNode.setKey(songAdd);
                     graphArray[i] = addSongNode;
                     break; // Stop after finding spot for song
@@ -316,7 +328,7 @@ public class Graph<E> {
             for (int i = 0; i < graphArray.length; i++) {
                 if (graphArray[i] == null) {
                     artistIndex = i;
-                    GraphNode addArtistNode = new GraphNode();
+                    GraphNode<E> addArtistNode = new GraphNode<E>();
                     addArtistNode.setKey(artistAdd);
                     graphArray[i] = addArtistNode;
                     break; // Stop after finding spot for artist
@@ -354,7 +366,7 @@ public class Graph<E> {
                         songIndex = i;
                         b = i;
 
-                        GraphNode addSongNode = new GraphNode();
+                        GraphNode<E> addSongNode = new GraphNode<E>();
                         addSongNode.setKey(songAdd);
                         graphArray[i] = addSongNode;
                         break; // Stop after finding spot for song
@@ -366,8 +378,11 @@ public class Graph<E> {
         }
     }
 
-
-    public void addVertex(GraphNode add) {
+    /**
+     * add a graph node
+     * @param add graph node
+     */
+    public void addVertex(GraphNode<E> add) {
         for (int i = 0; i < graphArray.length; i++) {
             if (graphArray[i] == null) {
                 graphArray[i] = add;
@@ -378,7 +393,11 @@ public class Graph<E> {
     }
 
 
-    // Adds a new edge from node v to node w
+    /**
+     * Adds a new edge from node v to node w
+     * @param v artist indice
+     * @param w song indice
+     */
     public void addEdge(int v, int w) {
         SinglyLinkedList<Integer> songList = graphArray[v].getValue();
         SinglyLinkedList<Integer> artistList = graphArray[w].getValue();
@@ -396,7 +415,7 @@ public class Graph<E> {
         }
         if (!isSongAdded) {
             songList.add(w); // Add only if not already present
-            edgeCount++;
+   
         }
 
         boolean isArtistAdded = false;
@@ -412,11 +431,14 @@ public class Graph<E> {
         }
         if (!isArtistAdded) {
             artistList.add(v); // Add only if not already present
-            edgeCount++;
+         
         }
     }
 
-
+    /**
+     * delte a node and it's edges
+     * @param rem artist/song to remove
+     */
     public void remove(String rem) {
         int index = -1;
         for (int i = 0; i < graphArray.length; i++) {
@@ -432,7 +454,11 @@ public class Graph<E> {
         }
     }
 
-
+    /**
+     * remove the indicated edge
+     * @param rem the 
+     * node to be removed
+     */
     public void removeEdge(int rem) {
         for (int i = 0; i < graphArray.length; i++) {
             if (graphArray[i] != null) {
@@ -446,7 +472,11 @@ public class Graph<E> {
         }
     }
 
-
+    /**
+     * get the # nodes of 
+     * the largest component
+     * @return int array
+     */
     public int[] getLargestComponentNodes() {
         int[] parent = compute();
         int[] componentSizes = new int[graphSize];
