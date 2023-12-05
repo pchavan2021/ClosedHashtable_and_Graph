@@ -4,7 +4,7 @@
 
 /**
  * @author Pallavi Chavan pallucha21 and Evan Howe evanhowe03
- * @version 09/14/23
+ * @version 1.0
  * 
  * @param <K>
  *            artist/song
@@ -34,7 +34,15 @@ public class Node<K, V> {
         tomb = false;
     }
 
-
+    /**
+     * get tombstone method
+     * @return
+     */
+    public boolean getTomb() {
+        return tomb;
+    }
+    
+    
     /**
      * is tomb method
      */
@@ -53,12 +61,18 @@ public class Node<K, V> {
         tomb = set;
     }
 
-
+    /**
+     * get key method
+     * @return
+     */
     public K getKey() {
         return key;
     }
 
-
+    /**
+     * get value method
+     * @return
+     */
     public V getValue() {
         return value;
     }
