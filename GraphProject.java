@@ -48,7 +48,7 @@ public class GraphProject {
         }
         else {
             CommandProcessor hello = new CommandProcessor(10,
-                "testRemove.txt");
+                "P4sampleInput.txt");
 
         }
         // This is the main file for the program.
