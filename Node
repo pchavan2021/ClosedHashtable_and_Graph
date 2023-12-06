@@ -11,9 +11,9 @@
  * @param <V>
  *            node from the graph
  */
-public class Node<K, V> {
-    private K key;
-    private V value;
+public class Node {
+    private String key;
+    private GraphNode value;
     private boolean tomb;
 
     // K is the string of the artist.song
@@ -23,14 +23,14 @@ public class Node<K, V> {
     /**
      * node class construtor
      * 
-     * @param kleppe
+     * @param stringOrArtist
      *            key
-     * @param valentina
+     * @param node
      *            value
      */
-    public Node(K kleppe, V valentina) {
-        this.key = kleppe;
-        this.value = valentina;
+    public Node(String stringOrArtist, GraphNode node) {
+        this.key = stringOrArtist;
+        this.value = node;
         tomb = false;
     }
 
@@ -65,7 +65,7 @@ public class Node<K, V> {
      * get key method
      * @return
      */
-    public K getKey() {
+    public String getKey() {
         return key;
     }
 
@@ -73,7 +73,7 @@ public class Node<K, V> {
      * get value method
      * @return
      */
-    public V getValue() {
+    public GraphNode getValue() {
         return value;
     }
 
