@@ -6,11 +6,11 @@
  *            this is the value
  * @version 09/14/23
  */
-public class HashTable<K, V> {
+public class HashTable {
     private int hashSize; // hash
     private int size; // size
     private Node[] table; // tab;e
-    private Hash compute;
+
     private boolean song;
 
     /**
@@ -24,13 +24,13 @@ public class HashTable<K, V> {
         hashSize = initialHashSize;
         size = 0;
         table = new Node[hashSize];
-        compute = new Hash();
+     
 
     }
 
 
     /**
-     * return the size of the hash table
+     * return the size of the hash table.l
      */
     public int getHashSize() {
         return hashSize;
@@ -45,7 +45,7 @@ public class HashTable<K, V> {
      * new one
      */
     private void doubleTable() {
-        Node<K, V>[] oldTable = table;
+        Node[] oldTable = table;
         int oldSize = hashSize;
 
         hashSize *= 2;
@@ -53,8 +53,8 @@ public class HashTable<K, V> {
 
         for (int i = 0; i < oldSize; i++) {
             if (oldTable[i] != null && !oldTable[i].isDeleted()) {
-                K key = oldTable[i].getKey();
-                V value = oldTable[i].getValue();
+                String key = oldTable[i].getKey();
+                GraphNode value = oldTable[i].getValue();
 
                 int hash = Hash.h((String)key, hashSize);
                 int j = 0;
@@ -62,7 +62,7 @@ public class HashTable<K, V> {
                 while (j < hashSize) {
                     int probe = (hash + j * j) % hashSize;
                     if (table[probe] == null) {
-                        table[probe] = new Node<>(key, value);
+                        table[probe] = new Node(key, value);
                         break;
                     }
                     j++;
@@ -82,7 +82,7 @@ public class HashTable<K, V> {
      * succesful
      * @throws Exception
      */
-    public boolean insert(K key, V value, boolean fish)
+    public boolean insert(String key, GraphNode value, boolean fish)
         throws Exception {
         // Check if resizing is needed
         if (size >= (hashSize / 2)) {
@@ -101,12 +101,12 @@ public class HashTable<K, V> {
 
         while (i < hashSize) {
             int probe = (hash + i * i) % hashSize;
-            Node<K, V> entry = table[probe];
+            Node entry = table[probe];
             
 
             // If the spot is empty or marked for deletion, insert the new node
             if (entry == null || entry.isDeleted()) {
-                table[probe] = new Node<>(key, value);
+                table[probe] = new Node(key, value);
                 size++;
                 if (song) {
                     System.out.println("|" + key + "|"
@@ -149,7 +149,7 @@ public class HashTable<K, V> {
      *            this the key value
      * @return whether the deletion was successful or not
      */
-    public boolean delete(K key) {
+    public boolean delete(String key) {
         // Calculate the initial hash value
         int hash = Hash.h((String) key, hashSize);
         int i = 0;
@@ -157,7 +157,7 @@ public class HashTable<K, V> {
         // Use quadratic probing to find the key
         while (i < hashSize) {
             int probe = (hash + i * i) % hashSize;
-            Node<K, V> entry = table[probe];
+            Node entry = table[probe];
 
             // Check if the current spot is null (key not found)
             if (entry == null) {
@@ -195,13 +195,13 @@ public class HashTable<K, V> {
      * @param key thuis ishte key
      * @return the index
      */
-    public int findIndex(K key) {
+    public int findIndex(String key) {
         int hash = Hash.h((String)key, hashSize); // Initial hash computation
         int i = 0;
 
         while (i < hashSize) {
             int probe = (hash + i * i) % hashSize; // Quadratic probing
-            Node<K, V> entry = table[probe];
+            Node entry = table[probe];
 
             if (entry == null) {
                 return -1; // Key not found
