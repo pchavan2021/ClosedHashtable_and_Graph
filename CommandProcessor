@@ -1,6 +1,5 @@
 
 import java.io.*;
-import java.util.*;
 import java.util.Scanner;
 
 /**
@@ -81,17 +80,22 @@ public class CommandProcessor {
      * @throws Exception
      *             in case of bad input
      */
-    @SuppressWarnings("unchecked")
     public void insert(Scanner scanner) throws Exception {
         String line = scanner.nextLine();
         String[] parts = line.split("<SEP>", 2);
         String art = parts[0].trim();
         String son = parts[1].trim();
 
-        thisGraph.insert(art, son);
-        artist.insert(art, son, true);
+        GraphNode artistGraphNode = new GraphNode();
+        artistGraphNode.setKey(art);
+        
+        GraphNode songGraphNode = new GraphNode();
+        songGraphNode.setKey(son);
+        
+        thisGraph.insert(artistGraphNode, songGraphNode);
+        artist.insert(art, artistGraphNode, true);
         if (song.findIndex(son) == -1) { // Only insert if the song is not found
-            song.insert(son, art, true);
+            song.insert(son, songGraphNode, true);
         }
         
     }
