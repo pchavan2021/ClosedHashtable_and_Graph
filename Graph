@@ -9,6 +9,565 @@ public class Graph<E> {
     int graphSize;
     int[][] distances;
 
+import java.util.Arrays;
+
+
+/**
+ * @author Pallavi Chavan pallucha21 and evanhowe03
+ * @version 1.0
+ */
+public class Graph {
+
+    private GraphNode[] graphArray;
+    int graphSize;
+    int[][] distances;
+
+    /**
+     * graph constructor
+     * 
+     * @param n
+     *            intial size of graph
+     */
+    public Graph(int n) {
+        graphArray = new GraphNode[n];
+        graphSize = n;
+
+    }
+
+
+    /**
+     * compute # of connected components
+     * 
+     * @param parent
+     * @return the count
+     */
+    public int computeConnectedComponents(int[] parent) {
+        Arrays.sort(parent);
+        int uniqueCount = 0;
+        for (int i = 1; i < parent.length; i++) {
+            if (parent[i] != parent[i - 1]) {
+                uniqueCount++;
+            }
+        }
+
+        return uniqueCount;
+    }
+
+
+    /**
+     * 
+     * print method
+     */
+    public void print() {
+
+        int[] parent = compute();
+
+        // Initialize an array to keep track of the size of each component.
+        int[] componentSizes = new int[graphSize];
+        for (int i = 0; i < graphSize; i++) {
+            // Initialize all component sizes to 0.
+            componentSizes[i] = 0;
+        }
+
+        // Calculate the size of each component.
+        for (int i = 0; i < graphSize; i++) {
+            if (graphArray[i] != null) {
+                // Increment the size of the component that the current node
+                // belongs to.
+                int root = FIND(i, parent);
+                componentSizes[root]++;
+            }
+        }
+
+        // Find the size of the largest component.
+        int maxComponentSize = 0;
+        for (int size : componentSizes) {
+            if (size > maxComponentSize) {
+                maxComponentSize = size;
+            }
+        }
+
+        System.out.println("There are " + computeConnectedComponents(
+            parent) + " connected components");
+        System.out.println("The largest connected component has "
+            + maxComponentSize + " elements");
+
+        SinglyLinkedList<int[]> largestComponents =
+            getAllLargestComponentNodes();
+        int largestDiameter = 0;
+
+      
+        for (int i = 0; i < largestComponents.size(); i++) {
+        
+            int[] component = largestComponents.get(i);
+            int diameter = calculateDiameter(component);
+            largestDiameter = Math.max(largestDiameter, diameter);
+        }
+
+        System.out.println("The diameter of the largest component is "
+            + largestDiameter);
+
+    }
+
+
+    /**
+     * use the union/find algorithm to create
+     * the parent array
+     * 
+     * @return the parent array
+     */
+    public int[] compute() {
+        int parent[] = new int[graphSize];
+        int weights[] = new int[graphSize];
+
+        for (int i = 0; i < parent.length; i++) {
+            parent[i] = -1;
+        }
+
+        for (int i = 0; i < weights.length; i++) {
+            weights[i] = 1;
+        }
+
+        // Apply UNION
+        for (int i = 0; i < graphArray.length; i++) {
+            if (graphArray[i] != null) {
+                SinglyLinkedList<Integer> neighbors = graphArray[i]
+                    .getValue();
+
+                for (int j = 0; j < neighbors.size(); j++) {
+
+                    if (FIND(i, parent) != FIND(neighbors.get(j),
+                        parent)) {
+                        UNION(i, neighbors.get(j), parent, weights);
+                    }
+                }
+            }
+        }
+
+        return parent;
+
+    }
+
+
+    /**
+     * merge two subtrees if theyre different
+     * 
+     * @param a
+     *            index of root of first node
+     * @param b
+     *            index of root of 2nd node
+     * @param parent
+     *            parent array
+     * @param weights
+     *            weights array
+     */
+    public void UNION(int a, int b, int[] parent, int[] weights) {
+        int root1 = FIND(a, parent); // Find root of node a
+        int root2 = FIND(b, parent); // Find root of node b
+        if (root1 != root2) { // Merge with weighted union
+            if (weights[root2] > weights[root1]) {
+                parent[root1] = root2;
+                weights[root2] += weights[root1];
+            }
+            else {
+                parent[root2] = root1;
+                weights[root1] += weights[root2];
+            }
+        }
+    }
+
+
+    /**
+     * Return the root of curr's tree
+     * 
+     * @param curr
+     *            current node
+     * @param parent
+     *            parent array
+     * @return index of root node
+     */
+    public int FIND(int curr, int[] parent) {
+        while (parent[curr] != -1) {
+            curr = parent[curr];
+        }
+        return curr; // Now at root
+    }
+
+
+    /**
+     * expand the graph
+     */
+    public void expandGraph() {
+        int oldSize = graphSize;
+        graphSize = graphSize * 2;
+
+        GraphNode[] oldGraph = graphArray;
+
+        graphArray = new GraphNode[graphSize];
+        for (int i = 0; i < oldSize; i++) {
+            graphArray[i] = oldGraph[i];
+        }
+
+    }
+
+
+    /**
+     * find the size of the graph
+     * 
+     * @return the size
+     */
+    public int getSize() {
+        int count = 0;
+        for (int i = 0; i < graphArray.length; i++) {
+            if (graphArray[i] != null) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+
+    /**
+     * insert song and artist
+     * 
+     * @param artistAdd
+     *            string
+     * @param songAdd
+     *            string
+     */
+    public void insert(GraphNode artistGraphNode, GraphNode songGraphNode) {
+        String artistAdd = artistGraphNode.getKey();
+        String songAdd = songGraphNode.getKey();
+        
+        int artistIndex = -1;
+        int songIndex = -1;
+
+        int count = getSize();
+
+        if (count >= graphSize * 0.75) {
+
+            expandGraph();
+        }
+        // MAYBE ERRORING ON THIS
+        for (int i = 0; i < graphArray.length; i++) {
+            if (graphArray[i] != null) {
+                if (graphArray[i].getKey().equals(artistAdd)) {
+                    artistIndex = i;
+                    break;
+                }
+            }
+        }
+
+        for (int i = 0; i < graphArray.length; i++) {
+            if (graphArray[i] != null) {
+                if (graphArray[i].getKey().equals(songAdd)) {
+                    songIndex = i;
+                    break;
+                }
+            }
+        }
+
+        if (artistIndex >= 0 && songIndex >= 0) {
+
+            addEdge(artistIndex, songIndex);
+        }
+        else if (artistIndex >= 0 && songIndex < 0) {
+            for (int i = 0; i < graphArray.length; i++) {
+                if (graphArray[i] == null) {
+                    songIndex = i;
+                    GraphNode addSongNode = new GraphNode();
+                    addSongNode.setKey(songAdd);
+                    graphArray[i] = addSongNode;
+                    break;
+                }
+            }
+
+            addEdge(artistIndex, songIndex);
+        }
+        else if (artistIndex < 0 && songIndex >= 0) {
+
+            for (int i = 0; i < graphArray.length; i++) {
+                if (graphArray[i] == null) {
+                    artistIndex = i;
+                    GraphNode addArtistNode = new GraphNode();
+                    addArtistNode.setKey(artistAdd);
+                    graphArray[i] = addArtistNode;
+                    break;
+                }
+            }
+
+            addEdge(artistIndex, songIndex);
+
+        }
+        else if (artistIndex < 0 && songIndex < 0) {
+            int a = -1000;
+            int b = -1000;
+
+            if (artistIndex == -1) {
+                for (int i = 0; i < graphArray.length; i++) {
+                    if (graphArray[i] == null) {
+                        artistIndex = i;
+                        a = i;
+
+                        GraphNode addArtistNode =
+                            new GraphNode();
+                        addArtistNode.setKey(artistAdd);
+                        graphArray[i] = addArtistNode;
+                        break; // Stop after finding spot for artist
+                    }
+
+                }
+            }
+
+            if (songIndex == -1) {
+                for (int i = 0; i < graphArray.length; i++) {
+                    if (graphArray[i] == null) {
+                        songIndex = i;
+                        b = i;
+
+                        GraphNode addSongNode = new GraphNode();
+                        addSongNode.setKey(songAdd);
+                        graphArray[i] = addSongNode;
+                        break; // Stop after finding spot for song
+                    }
+                }
+            }
+            addEdge(a, b);
+
+        }
+    }
+
+
+    /**
+     * add a graph node
+     * 
+     * @param add
+     *            graph node
+     */
+    public void addVertex(GraphNode add) {
+        for (int i = 0; i < graphArray.length; i++) {
+            if (graphArray[i] == null) {
+                graphArray[i] = add;
+
+                break;
+            }
+        }
+    }
+
+
+    /**
+     * Adds a new edge from node v to node w
+     * 
+     * @param v
+     *            artist indice
+     * @param w
+     *            song indice
+     */
+    public void addEdge(int v, int w) {
+        SinglyLinkedList<Integer> songList = graphArray[v].getValue();
+        SinglyLinkedList<Integer> artistList = graphArray[w]
+            .getValue();
+
+        boolean isSongAdded = false;
+        for (int i = 0; i < songList.size(); i++) {
+            if (songList.get(i) != null && songList.get(i) == w) {
+                // Duplicate found, do not add
+                System.out.println("|" + graphArray[v].getKey()
+                    + "<SEP>" + graphArray[w].getKey()
+                    + "| duplicates a record already in the database.");
+                isSongAdded = true;
+                return;
+            }
+        }
+        if (!isSongAdded) {
+            songList.add(w); // Add only if not already present
+
+        }
+
+        boolean isArtistAdded = false;
+        for (int i = 0; i < artistList.size(); i++) {
+            if (artistList.get(i) != null && artistList.get(i) == v) {
+                // Duplicate found, do not add
+                System.out.println("|" + graphArray[v].getKey()
+                    + "<SEP>" + graphArray[w].getKey()
+                    + "| duplicates a record already in the database.");
+                isArtistAdded = true;
+                return;
+            }
+        }
+        if (!isArtistAdded) {
+            artistList.add(v); // Add only if not already present
+
+        }
+    }
+
+
+    /**
+     * delte a node and it's edges
+     * 
+     * @param rem
+     *            artist/song to remove
+     */
+    public void remove(String rem) {
+        int index = -1;
+        for (int i = 0; i < graphArray.length; i++) {
+            if (graphArray[i] != null) {
+
+                if (graphArray[i].getKey().equals(rem)) {
+                    index = i;
+                    graphArray[i] = null;
+                    removeEdge(index);
+                }
+
+            }
+        }
+    }
+
+
+    /**
+     * remove the indicated edge
+     * 
+     * @param rem
+     *            the
+     *            node to be removed
+     */
+    public void removeEdge(int rem) {
+        for (int i = 0; i < graphArray.length; i++) {
+            if (graphArray[i] != null) {
+                SinglyLinkedList<Integer> temp = graphArray[i]
+                    .getValue();
+                for (int j = 0; j < temp.size(); j++) {
+                    if (temp.get(j) == rem) {
+                        temp.remove(j);
+                    }
+                }
+            }
+        }
+    }
+
+
+    /**
+     * get the # nodes of
+     * the largest component
+     * 
+     * @return int array
+     */
+    public SinglyLinkedList<int[]> getAllLargestComponentNodes() {
+        int[] parent = compute();
+        int[] componentSizes = new int[graphSize];
+        int maxComponentSize = 0;
+
+        // Calculate component sizes
+        for (int i = 0; i < graphSize; i++) {
+            if (graphArray[i] != null) {
+                int root = FIND(i, parent);
+                componentSizes[root]++;
+                maxComponentSize = Math.max(maxComponentSize,
+                    componentSizes[root]);
+            }
+        }
+
+        // Collect nodes for all components that are of max size
+        SinglyLinkedList<int[]> largestComponents =
+            new SinglyLinkedList<>();
+        for (int root = 0; root < graphSize; root++) {
+            if (componentSizes[root] == maxComponentSize) {
+                SinglyLinkedList<Integer> component =
+                    new SinglyLinkedList<>();
+                for (int i = 0; i < graphSize; i++) {
+                    if (FIND(i, parent) == root) {
+                        component.add(i);
+                    }
+                }
+                for (int root1 = 0; root1 < graphSize; root1++) {
+                    if (componentSizes[root1] == maxComponentSize) {
+                        SinglyLinkedList<Integer> component1 =
+                            new SinglyLinkedList<>();
+                        for (int i = 0; i < graphSize; i++) {
+                            if (FIND(i, parent) == root1) {
+                                component1.add(i);
+                            }
+                        }
+
+                        // Converting List<Integer> to int[]
+                        int[] componentArray = new int[component1
+                            .size()];
+                        for (int i = 0; i < component1.size(); i++) {
+                            componentArray[i] = component1.get(i);
+                        }
+                        largestComponents.add(componentArray);
+                    }
+                }
+
+            }
+        }
+
+        return largestComponents;
+    }
+
+    /**
+     * calculate the diameter of the 
+     * @param component list of 
+     * components with the largest same size
+     * @return the diameter
+     */
+    private int calculateDiameter(int[] component) {
+        int componentSize = component.length;
+        int[][] componentDistances =
+            new int[componentSize][componentSize];
+
+        // Initialize distances
+        for (int i = 0; i < componentSize; i++) {
+            Arrays.fill(componentDistances[i], Integer.MAX_VALUE);
+            componentDistances[i][i] = 0;
+            int nodeIdx = component[i];
+
+            if (graphArray[nodeIdx] != null) { // Check if the node is not null
+                SinglyLinkedList<Integer> connections =
+                    graphArray[nodeIdx].getValue();
+                for (int j = 0; j < connections.size(); j++) {
+                    int connection = connections.get(j);
+                    for (int k = 0; k < componentSize; k++) {
+                        if (component[k] == connection) {
+                            componentDistances[i][k] = 1; // edge has weight 1
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        for (int k = 0; k < componentSize; k++) {
+            for (int i = 0; i < componentSize; i++) {
+                for (int j = 0; j < componentSize; j++) {
+                    if (componentDistances[i][k] < Integer.MAX_VALUE
+                        && componentDistances[k][j] < Integer.MAX_VALUE) {
+                        componentDistances[i][j] = Math.min(
+                            componentDistances[i][j],
+                            componentDistances[i][k]
+                                + componentDistances[k][j]);
+                    }
+                }
+            }
+        }
+
+        // Find the diameter of the component
+        int diameter = 0;
+        for (int i = 0; i < componentSize; i++) {
+            for (int j = 0; j < componentSize; j++) {
+                if (componentDistances[i][j] != Integer.MAX_VALUE) {
+                    diameter = Math.max(diameter,
+                        componentDistances[i][j]);
+                }
+            }
+        }
+
+        return diameter;
+    }
+
+}
+
     /**
      * graph constructor
      * @param n intial size of graph
