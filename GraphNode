@@ -2,7 +2,7 @@
  * @author Pallavi Chavan pallucha21 and evanhowe03
  * @version 1.0
  */
-public class GraphNode<E> {
+public class GraphNode {
 
     private String key;
     private SinglyLinkedList<Integer> value;
