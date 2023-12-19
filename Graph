@@ -2,10 +2,6 @@
 import java.util.Arrays;
 
 
-/**
- * @author Pallavi Chavan pallucha21 and evanhowe03
- * @version 1.0
- */
 public class Graph {
 
     private GraphNode[] graphArray;
