@@ -2,13 +2,7 @@
 import java.io.*;
 import java.util.Scanner;
 
-/**
- * 
- *
- * @author Evan Howe (evanhowe03)
- * @author Pallavi Chavan (Pallucha21)
- * @version 10/10/23
- */
+
 public class CommandProcessor {
     private HashTable song;
     private HashTable artist;
